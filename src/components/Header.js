@@ -43,7 +43,7 @@ const Header = () => {
     <AntHeader>
       <div className="logo">
         <Link to="/dashboard/user">
-          <h1 style={{ color: "#fff" }}>快餐达人</h1>
+          <h1 style={{ color: "#fff" }}>快餐達人</h1>
         </Link>
       </div>
       <Menu
