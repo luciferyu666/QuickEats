@@ -1,0 +1,7 @@
+/* src/components/admin/RestaurantManagement.css */
+
+.restaurant-management-filters {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+}

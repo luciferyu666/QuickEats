@@ -1,23 +1,105 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
+# -----------------------------------
+# Node.js Dependencies
+# -----------------------------------
 /node_modules
 /.pnp
 .pnp.js
 
-# testing
+# -----------------------------------
+# Testing
+# -----------------------------------
 /coverage
 
-# production
+# -----------------------------------
+# Production Build
+# -----------------------------------
 /build
 
-# misc
-.DS_Store
-.env.local
+# -----------------------------------
+# OS Generated Files
+# -----------------------------------
+.DS_Store          # macOS Finder
+Thumbs.db          # Windows Explorer
+ehthumbs.db        # Windows Explorer
+Icon?              # macOS
+._*                # macOS resource fork
+
+# -----------------------------------
+# Environment Variables
+# -----------------------------------
+.env                # General environment variables
+.env.local          # Local overrides
 .env.development.local
 .env.test.local
 .env.production.local
 
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# -----------------------------------
+# Logs
+# -----------------------------------
+npm-debug.log*      # npm debug logs
+yarn-debug.log*     # Yarn debug logs
+yarn-error.log*     # Yarn error logs
+storybook.log       # Storybook logs
+
+# -----------------------------------
+# IDEs and Editors
+# -----------------------------------
+.vscode/            # Visual Studio Code
+.idea/              # IntelliJ IDEA
+*.suo               # Visual Studio
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# -----------------------------------
+# Editor Swap Files
+# -----------------------------------
+*.swp
+*.swo
+*.swn
+
+# -----------------------------------
+# Temporary Files
+# -----------------------------------
+*.tmp
+*.temp
+*.log
+
+# -----------------------------------
+# Secret Directories and Files
+# -----------------------------------
+/secrets/            # Directory for secret files
+*.key               # Key files
+*.pem               # Certificate files
+*.crt               # Certificate files
+*.env.*             # Additional environment files
+
+# -----------------------------------
+# NPM and Yarn Cache
+# -----------------------------------
+.npm/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# -----------------------------------
+# ESLint Cache
+# -----------------------------------
+.eslintcache
+
+# -----------------------------------
+# Miscellaneous
+# -----------------------------------
+/.cache               # General cache
+public/asset-manifest.json  # Create React App asset manifest
+
+# -----------------------------------
+# Optional: Disable specific files
+# -----------------------------------
+# Uncomment if you have service worker files you don't want to track
+# service-worker.js
+# workbox-*.js

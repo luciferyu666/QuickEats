@@ -1,0 +1,27 @@
+/* src/components/MenuItemCard.css */
+
+.menuItemImage {
+  width: 100%;
+  object-fit: cover;
+}
+
+@media (min-width: 1200px) {
+  /* Desktop */
+  .menuItemImage {
+    height: 300px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  /* Tablet */
+  .menuItemImage {
+    height: 225px;
+  }
+}
+
+@media (max-width: 767px) {
+  /* Mobile */
+  .menuItemImage {
+    height: 150px;
+  }
+}

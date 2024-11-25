@@ -1,25 +1,19 @@
-import logo from './logo.svg';
-import './App.css';
+// src/App.js
 
-function App() {
+import React from "react";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+import "./App.css"; // 引入全局樣式（如有需要）
+
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Header />
+      {/* 這裡的 AppRoutes 已經在 index.js 中被渲染，因此不需要在這裡再次引入 */}
+      {/* <AppRoutes /> */}
+      <Footer />
+    </>
   );
-}
+};
 
 export default App;

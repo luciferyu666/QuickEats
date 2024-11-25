@@ -1,0 +1,94 @@
+/* src/components/admin/SystemMonitoring.css */
+
+/* 容器樣式 */
+.system-monitoring-container {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 卡片標題樣式 */
+.system-monitoring-container .ant-card-title {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* 服務狀態監控區域 */
+.system-monitoring-container .service-status {
+  display: flex;
+  flex-direction: column;
+}
+
+.system-monitoring-container .service-status-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.system-monitoring-container .service-status-item:last-child {
+  border-bottom: none;
+}
+
+.system-monitoring-container .service-name {
+  font-size: 16px;
+}
+
+.system-monitoring-container .service-status-tag {
+  font-weight: bold;
+}
+
+/* 流量與性能統計區域 */
+.system-monitoring-container .traffic-stats {
+  margin-top: 20px;
+}
+
+.system-monitoring-container .traffic-stat-item {
+  margin-bottom: 15px;
+}
+
+.system-monitoring-container .traffic-stat-item strong {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 16px;
+}
+
+/* 系統錯誤日志區域 */
+.system-monitoring-container .error-logs {
+  margin-top: 20px;
+}
+
+.system-monitoring-container .error-log-item {
+  margin-bottom: 10px;
+}
+
+/* 高亮錯誤日志 */
+.system-monitoring-container .error-log-item:last-child {
+  margin-bottom: 0;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .system-monitoring-container {
+    padding: 15px;
+  }
+
+  .system-monitoring-container .ant-card-title {
+    font-size: 16px;
+  }
+
+  .system-monitoring-container .service-name {
+    font-size: 14px;
+  }
+
+  .system-monitoring-container .traffic-stat-item strong {
+    font-size: 14px;
+  }
+}
+
+/* 模塊間距調整 */
+.system-monitoring-container .ant-card-body {
+  padding: 20px;
+}

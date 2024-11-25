@@ -1,17 +1,24 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+// src/index.js
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+import React from "react";
+import ReactDOM from "react-dom/client"; // React 18 的新 API
+import "./index.css";
+import AppRoutes from "./routes/AppRoutes"; // 引入 AppRoutes
+import { BrowserRouter as Router } from "react-router-dom"; // 引入 Router
+import { CartProvider } from "./context/CartContext"; // 引入 CartProvider
+import reportWebVitals from "./reportWebVitals";
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <App />
+    <CartProvider>
+      <Router>
+        <AppRoutes />
+      </Router>
+    </CartProvider>
   </React.StrictMode>
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+// 如果您想在應用中測量性能，請傳遞一個函數
+// 來記錄結果（例如：reportWebVitals(console.log)）
 reportWebVitals();

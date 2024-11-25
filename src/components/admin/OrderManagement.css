@@ -1,0 +1,33 @@
+/* src/components/admin/OrderManagement.css */
+
+.order-management-container {
+  width: 100%;
+}
+
+.order-management-filters {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.order-management-filters .ant-select,
+.order-management-filters .ant-input {
+  max-width: 100%;
+}
+
+.ant-modal-content {
+  max-width: 600px; /* 限制模態框的最大寬度 */
+}
+
+.ant-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.ant-table {
+  width: 100%;
+}
+
+.ant-table-cell .ant-btn {
+  white-space: nowrap; /* 防止按鈕文字換行 */
+}

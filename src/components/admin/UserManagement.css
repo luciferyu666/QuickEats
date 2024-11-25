@@ -1,0 +1,98 @@
+/* src/components/admin/UserManagement.css */
+
+/* 容器樣式 */
+.user-management-container {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 搜索欄樣式 */
+.user-management-container .search-bar {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.user-management-container .search-bar .ant-input {
+  width: 300px;
+}
+
+/* 表格樣式 */
+.user-management-container .ant-table {
+  background-color: #f9f9f9;
+}
+
+.user-management-container .ant-table-thead > tr > th {
+  background-color: #fafafa;
+  font-weight: bold;
+  text-align: center;
+}
+
+.user-management-container .ant-table-tbody > tr > td {
+  text-align: center;
+}
+
+/* 標籤樣式 */
+.user-management-container .ant-tag {
+  font-weight: bold;
+}
+
+/* 按鈕樣式 */
+.user-management-container .ant-btn-link {
+  color: #1890ff;
+}
+
+.user-management-container .ant-btn-link:hover {
+  color: #40a9ff;
+}
+
+/* 模態框樣式 */
+.user-management-container .ant-modal-title {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.user-management-container .ant-modal-body {
+  padding: 20px;
+}
+
+.user-management-container .ant-modal-footer .ant-btn-primary {
+  background-color: #1890ff;
+  border-color: #1890ff;
+}
+
+.user-management-container .ant-modal-footer .ant-btn-danger {
+  background-color: #ff4d4f;
+  border-color: #ff4d4f;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .user-management-container .search-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .user-management-container .search-bar .ant-input {
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .user-management-container .ant-table-thead > tr > th,
+  .user-management-container .ant-table-tbody > tr > td {
+    font-size: 14px;
+  }
+}
+
+/* 高亮行樣式 */
+.user-management-container .ant-table-tbody > tr:hover > td {
+  background-color: #e6f7ff;
+}
+
+/* 表格分頁樣式 */
+.user-management-container .ant-pagination {
+  text-align: right;
+  margin-top: 20px;
+}

@@ -1,0 +1,20 @@
+/* src/pages/LandingPage.css */
+
+.landing-page {
+  background-color: #f0f2f5;
+  min-height: 100vh;
+}
+
+.role-card {
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.role-card:hover {
+  transform: scale(1.05);
+}
+
+.landing-page .ant-card-cover img {
+  height: 200px;
+  object-fit: cover;
+}

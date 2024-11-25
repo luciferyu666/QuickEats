@@ -1,0 +1,30 @@
+/* src/pages/AdminDashboard.css */
+
+.admin-dashboard-content {
+  background: #f0f2f5;
+}
+
+.admin-dashboard-content .ant-card {
+  background: #fff;
+}
+
+.admin-dashboard-content .ant-card-title {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* 確保卡片內部內容不會溢出 */
+.admin-dashboard-content .ant-card {
+  overflow: hidden; /* 如果需要，根據具體情況調整 */
+}
+
+/* 調整按鈕的間距 */
+.admin-dashboard-content .ant-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap; /* 允許按鈕換行 */
+}
+
+.admin-dashboard-content .ant-card-actions > .ant-btn {
+  margin-bottom: 8px; /* 增加按鈕之間的垂直間距 */
+}
