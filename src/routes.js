@@ -10,7 +10,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 // 如果有其他頁面，請在此處引入
 
 const AppRoutes = () => (
-  <Router>
+  <Router basename={process.env.PUBLIC_URL}>
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/user" element={<UserDashboard />} />
