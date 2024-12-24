@@ -171,11 +171,11 @@ export const pendingOrders = [
     user: "林小華",
     userAddress: "高雄市立鳳山醫院 830高雄市鳳山區經武路42之1號",
     userLocation: { lat: 22.62, lng: 120.432 }, // 用戶位置
-    distance: "5公里",
+    distance: "5公裡",
     estimatedTime: "30分鐘",
     status: "待接單",
     totalAmount: 250,
-    timestamp: dayjs("2024-04-05T10:30:00"),
+    timestamp: dayjs("2024-11-05T10:30:00"),
   },
   // 更多待接單訂單...
   {
@@ -186,11 +186,11 @@ export const pendingOrders = [
     user: "鄭十",
     userAddress: "高雄市左營區青海路90號",
     userLocation: { lat: 22.63, lng: 120.29 }, // 用戶位置（假設同餐廳位置）
-    distance: "6公里",
+    distance: "6公裡",
     estimatedTime: "35分鐘",
     status: "待接單",
     totalAmount: 300,
-    timestamp: dayjs("2024-04-15T09:20:00"),
+    timestamp: dayjs("2024-11-15T09:20:00"),
   },
 ];
 
@@ -204,14 +204,14 @@ export const completedOrders = [
     user: "張三",
     userAddress: "台北市萬華區成都路200號",
     userLocation: { lat: 25.046, lng: 121.5123 }, // 用戶位置
-    distance: "3公里",
+    distance: "3公裡",
     deliveryTime: "25分鐘",
     status: "已完成",
     totalAmount: 200,
     rating: 5,
     feedback: "非常快速，服務態度好！",
     reply: "謝謝您的支持，期待再次為您服務！",
-    timestamp: dayjs("2024-04-04T09:15:00"),
+    timestamp: dayjs("2024-11-04T09:15:00"),
   },
   {
     orderId: "ORD123451",
@@ -221,14 +221,14 @@ export const completedOrders = [
     user: "李四",
     userAddress: "高雄市左營區自由路100號",
     userLocation: { lat: 22.63, lng: 120.29 }, // 用戶位置（假設同餐廳位置）
-    distance: "4公里",
+    distance: "4公裡",
     deliveryTime: "30分鐘",
     status: "已完成",
     totalAmount: 350,
     rating: 4,
     feedback: "整體滿意，但配送速度可以再快一些。",
     reply: "感謝您的回饋，我們會努力改進配送速度。",
-    timestamp: dayjs("2024-04-04T10:45:00"),
+    timestamp: dayjs("2024-11-04T10:45:00"),
   },
   {
     orderId: "ORD123452",
@@ -238,14 +238,14 @@ export const completedOrders = [
     user: "王小華",
     userAddress: "高雄市鼓山區瑞光路200號",
     userLocation: { lat: 22.638, lng: 120.28 }, // 用戶位置
-    distance: "2公里",
+    distance: "2公裡",
     deliveryTime: "20分鐘",
     status: "已完成",
     totalAmount: 180,
     rating: 5,
     feedback: "服務態度佳，配送迅速！",
     reply: "感謝您的好評，期待您的下次光臨！",
-    timestamp: dayjs("2024-04-05T11:30:00"),
+    timestamp: dayjs("2024-11-05T11:30:00"),
   },
   {
     orderId: "ORD123466-COMP",
@@ -255,14 +255,14 @@ export const completedOrders = [
     user: "周十二",
     userAddress: "高雄市鳥松區光華路88號",
     userLocation: { lat: 22.6273, lng: 120.3014 }, // 用戶位置（假設同餐廳位置）
-    distance: "5公里",
+    distance: "5公裡",
     deliveryTime: "30分鐘",
     status: "已完成",
     totalAmount: 350,
     rating: 4,
     feedback: "菜品美味，配送速度適中。",
     reply: "感謝您的回饋，期待您的下次光臨！",
-    timestamp: dayjs("2024-04-17T11:30:00"),
+    timestamp: dayjs("2024-11-17T11:30:00"),
   },
   {
     orderId: "ORD123467",
@@ -272,14 +272,14 @@ export const completedOrders = [
     user: "李十一",
     userAddress: "高雄市新興區中正三路50號",
     userLocation: { lat: 22.63, lng: 120.31 }, // 用戶位置
-    distance: "6公里",
+    distance: "6公裡",
     deliveryTime: "35分鐘",
     status: "已完成",
     totalAmount: 280,
     rating: 5,
     feedback: "韓式炸雞非常酥脆，冰紅茶也很清爽。",
     reply: "感謝您的好評，期待您的下次光臨！",
-    timestamp: dayjs("2024-04-16T15:45:00"),
+    timestamp: dayjs("2024-11-16T15:45:00"),
   },
   // 更多已完成訂單...
 ];
@@ -429,7 +429,7 @@ export const restaurants = [
     status: "營業中",
     image: "/assets/images/restaurant1.png",
     description: "提供各種美味漢堡，選擇豐富。",
-    address: "台北市中正區忠孝西路一段",
+    address: "高雄市鼓山區文信路198號",
   },
   {
     id: "rest2",
@@ -439,7 +439,7 @@ export const restaurants = [
     status: "營業中",
     image: "/assets/images/restaurant2.png",
     description: "新鮮的海鮮壽司，直達您的餐桌。",
-    address: "台北市大安區仁愛路四段1號",
+    address: "高雄市鼓山區民利街5號",
   },
   {
     id: "rest3",
@@ -466,7 +466,7 @@ export const restaurantOrders = [
     ],
     totalAmount: 320,
     status: "新訂單", // 新訂單、準備中、等待配送、已完成
-    timestamp: dayjs("2024-04-05T10:30:00"),
+    timestamp: dayjs("2024-11-05T10:30:00"),
   },
   {
     orderId: "RESTORD124",
@@ -475,7 +475,7 @@ export const restaurantOrders = [
     orderItems: [{ name: "宮保雞丁", quantity: 1, price: 120 }],
     totalAmount: 120,
     status: "準備中",
-    timestamp: dayjs("2024-04-05T11:00:00"),
+    timestamp: dayjs("2024-11-05T11:00:00"),
   },
   {
     orderId: "RESTORD125",
@@ -487,7 +487,7 @@ export const restaurantOrders = [
     ],
     totalAmount: 550,
     status: "等待配送",
-    timestamp: dayjs("2024-04-06T12:45:00"),
+    timestamp: dayjs("2024-11-06T12:45:00"),
   },
   {
     orderId: "RESTORD126",
@@ -499,7 +499,7 @@ export const restaurantOrders = [
     ],
     totalAmount: 140,
     status: "已完成",
-    timestamp: dayjs("2024-04-07T14:00:00"),
+    timestamp: dayjs("2024-11-07T14:00:00"),
   },
   // 新增餐廳訂單示例
   {
@@ -512,7 +512,7 @@ export const restaurantOrders = [
     ],
     totalAmount: 250,
     status: "新訂單",
-    timestamp: dayjs("2024-04-18T16:00:00"),
+    timestamp: dayjs("2024-11-18T16:00:00"),
   },
   {
     orderId: "RESTORD128",
@@ -524,7 +524,7 @@ export const restaurantOrders = [
     ],
     totalAmount: 340,
     status: "準備中",
-    timestamp: dayjs("2024-04-19T12:20:00"),
+    timestamp: dayjs("2024-11-19T12:20:00"),
   },
   // 更多餐廳訂單...
 ];
@@ -532,67 +532,67 @@ export const restaurantOrders = [
 // ==================== 工作日誌模擬數據 ====================
 export const workLogs = [
   {
-    date: "2024-04-01",
-    status: "在線",
+    date: "2024-11-01",
+    status: "線上",
     deliveries: 5,
-    distance: "20公里",
+    distance: "20公裡",
     timeSpent: "5小時",
   },
   {
-    date: "2024-04-02",
+    date: "2024-11-02",
     status: "休息",
     deliveries: 0,
-    distance: "0公里",
+    distance: "0公裡",
     timeSpent: "0小時",
   },
   {
-    date: "2024-04-03",
-    status: "在線",
+    date: "2024-11-03",
+    status: "線上",
     deliveries: 7,
-    distance: "35公里",
+    distance: "35公裡",
     timeSpent: "6小時",
   },
   {
-    date: "2024-04-04",
-    status: "在線",
+    date: "2024-11-04",
+    status: "線上",
     deliveries: 4,
-    distance: "15公里",
+    distance: "15公裡",
     timeSpent: "4小時",
   },
   {
-    date: "2024-04-05",
+    date: "2024-11-05",
     status: "休息",
     deliveries: 0,
-    distance: "0公里",
+    distance: "0公裡",
     timeSpent: "0小時",
   },
   // 新增工作日誌示例
   {
-    date: "2024-04-06",
-    status: "在線",
+    date: "2024-11-06",
+    status: "線上",
     deliveries: 6,
-    distance: "25公里",
+    distance: "25公裡",
     timeSpent: "5.5小時",
   },
   {
-    date: "2024-04-07",
+    date: "2024-11-07",
     status: "休息",
     deliveries: 0,
-    distance: "0公里",
+    distance: "0公裡",
     timeSpent: "0小時",
   },
   {
-    date: "2024-04-08",
-    status: "在線",
+    date: "2024-11-08",
+    status: "線上",
     deliveries: 8,
-    distance: "30公里",
+    distance: "30公裡",
     timeSpent: "6小時",
   },
   {
-    date: "2024-04-09",
-    status: "在線",
+    date: "2024-11-09",
+    status: "線上",
     deliveries: 4,
-    distance: "15公里",
+    distance: "15公裡",
     timeSpent: "4小時",
   },
   // 更多工作日誌...
@@ -606,7 +606,7 @@ export const userReviews = [
     rating: 5,
     feedback: "菜品非常美味，送餐迅速！",
     reply: "謝謝您的支持，期待再次為您服務！",
-    timestamp: dayjs("2024-04-05T10:35:00"),
+    timestamp: dayjs("2024-11-05T10:35:00"),
   },
   {
     orderId: "RESTORD124",
@@ -614,7 +614,7 @@ export const userReviews = [
     rating: 4,
     feedback: "整體滿意，但配送速度可以再快一些。",
     reply: "感謝您的回饋，我們會努力改進配送速度。",
-    timestamp: dayjs("2024-04-05T11:05:00"),
+    timestamp: dayjs("2024-11-05T11:05:00"),
   },
   {
     orderId: "RESTORD125",
@@ -622,7 +622,7 @@ export const userReviews = [
     rating: 5,
     feedback: "韓式炸雞非常酥脆，冰紅茶也很清爽。",
     reply: "感謝您的好評，期待您的下次光臨！",
-    timestamp: dayjs("2024-04-06T12:50:00"),
+    timestamp: dayjs("2024-11-06T12:50:00"),
   },
   {
     orderId: "RESTORD126",
@@ -630,7 +630,7 @@ export const userReviews = [
     rating: 3,
     feedback: "巧克力蛋糕味道一般，冰紅茶稍微甜了些。",
     reply: "感謝您的回饋，我們會調整甜度以提供更好的口感。",
-    timestamp: dayjs("2024-04-07T14:05:00"),
+    timestamp: dayjs("2024-11-07T14:05:00"),
   },
   // 新增用戶評價示例
   {
@@ -639,7 +639,7 @@ export const userReviews = [
     rating: 4,
     feedback: "韓式炸雞不錯，冰紅茶稍微有點甜。",
     reply: "感謝您的回饋，我們會調整甜度以提供更好的口感。",
-    timestamp: dayjs("2024-04-18T16:10:00"),
+    timestamp: dayjs("2024-11-18T16:10:00"),
   },
   {
     orderId: "RESTORD128",
@@ -647,7 +647,7 @@ export const userReviews = [
     rating: 3,
     feedback: "巧克力蛋糕味道一般，蔥油餅稍微鹹了一點。",
     reply: "感謝您的意見，我們會持續改進菜品口味。",
-    timestamp: dayjs("2024-04-19T12:30:00"),
+    timestamp: dayjs("2024-11-19T12:30:00"),
   },
   // 更多評價...
 ];
@@ -827,8 +827,8 @@ export const operatingHours = {
       close: dayjs("22:00", "HH:mm"),
     },
     {
-      key: "2024-12-25",
-      date: "2024-12-25",
+      key: "2024-11-25",
+      date: "2024-11-25",
       status: "休息中",
       open: null,
       close: null,
@@ -860,7 +860,7 @@ export const settings = {
   email: "restaurant@example.com",
   roles: ["管理員", "菜單管理員", "訂單管理員"],
   operatingHours: operatingHours,
-  deliveryRange: "10公里",
+  deliveryRange: "10公裡",
   // 新增設定示例
   currency: "NT$",
   language: "繁體中文",
@@ -872,48 +872,48 @@ export const settings = {
 
 // 每日收入模擬數據
 export const dailyRevenue = [
-  { date: "2024-04-01", amount: 1500 },
-  { date: "2024-04-02", amount: 1800 },
-  { date: "2024-04-03", amount: 2000 },
-  { date: "2024-04-04", amount: 1700 },
-  { date: "2024-04-05", amount: 1600 },
-  { date: "2024-04-06", amount: 1900 },
-  { date: "2024-04-07", amount: 2100 },
-  { date: "2024-04-08", amount: 2200 },
-  { date: "2024-04-09", amount: 2400 },
-  { date: "2024-04-10", amount: 2300 },
+  { date: "2024-11-01", amount: 1500 },
+  { date: "2024-11-02", amount: 1800 },
+  { date: "2024-11-03", amount: 2000 },
+  { date: "2024-11-04", amount: 1700 },
+  { date: "2024-11-05", amount: 1600 },
+  { date: "2024-11-06", amount: 1900 },
+  { date: "2024-11-07", amount: 2100 },
+  { date: "2024-11-08", amount: 2200 },
+  { date: "2024-11-09", amount: 2400 },
+  { date: "2024-11-10", amount: 2300 },
   // 新增每日收入示例
-  { date: "2024-04-11", amount: 2100 },
-  { date: "2024-04-12", amount: 1800 },
-  { date: "2024-04-13", amount: 2200 },
-  { date: "2024-04-14", amount: 2500 },
+  { date: "2024-11-11", amount: 2100 },
+  { date: "2024-11-12", amount: 1800 },
+  { date: "2024-11-13", amount: 2200 },
+  { date: "2024-11-14", amount: 2500 },
   // 更多每日收入...
 ];
 
 // 每周收入模擬數據
 export const weeklyRevenue = [
   {
-    weekStart: "2024-04-01",
-    weekEnd: "2024-04-07",
+    weekStart: "2024-11-01",
+    weekEnd: "2024-11-07",
     amount: 12000,
   },
   {
-    weekStart: "2024-04-08",
-    weekEnd: "2024-04-14",
+    weekStart: "2024-11-08",
+    weekEnd: "2024-11-14",
     amount: 14000,
   },
   {
-    weekStart: "2024-04-15",
-    weekEnd: "2024-04-21",
+    weekStart: "2024-11-15",
+    weekEnd: "2024-11-21",
     amount: 13000,
   },
   {
-    weekStart: "2024-04-22",
-    weekEnd: "2024-04-28",
+    weekStart: "2024-11-22",
+    weekEnd: "2024-11-28",
     amount: 15000,
   },
   {
-    weekStart: "2024-04-29",
+    weekStart: "2024-11-29",
     weekEnd: "2024-05-05",
     amount: 16000,
   },
@@ -928,7 +928,7 @@ export const weeklyRevenue = [
 
 // 每月收入模擬數據
 export const monthlyRevenue = [
-  { month: "2024-04", amount: 50000 },
+  { month: "2024-11", amount: 50000 },
   { month: "2024-05", amount: 60000 },
   { month: "2024-06", amount: 55000 },
   { month: "2024-07", amount: 62000 },
@@ -936,7 +936,7 @@ export const monthlyRevenue = [
   { month: "2024-09", amount: 63000 },
   { month: "2024-10", amount: 70000 },
   { month: "2024-11", amount: 65000 },
-  { month: "2024-12", amount: 72000 },
+  { month: "2024-11", amount: 72000 },
   // 新增每月收入示例
   { month: "2024-05", amount: 60000 },
   { month: "2024-06", amount: 55000 },
@@ -962,7 +962,7 @@ export const allOrders = [
     ],
     totalAmount: 200,
     status: "待處理", // 待處理、已處理、已完成、已取消
-    timestamp: dayjs("2024-04-11T16:20:00"),
+    timestamp: dayjs("2024-11-11T16:20:00"),
     deliveryInfo: {
       deliveryPerson: "陳大明",
       deliveryStatus: "配送中", // 配送中、已配送、配送失敗
@@ -985,7 +985,7 @@ export const allOrders = [
     ],
     totalAmount: 170,
     status: "已完成",
-    timestamp: dayjs("2024-04-19T12:20:00"),
+    timestamp: dayjs("2024-11-19T12:20:00"),
     deliveryInfo: {
       deliveryPerson: "黃小明",
       deliveryStatus: "已配送",
@@ -1008,7 +1008,7 @@ export const allOrders = [
     ],
     totalAmount: 360,
     status: "待處理",
-    timestamp: dayjs("2024-04-19T12:20:00"),
+    timestamp: dayjs("2024-11-19T12:20:00"),
     deliveryInfo: {
       deliveryPerson: "張小華",
       deliveryStatus: "配送中",
@@ -1024,7 +1024,7 @@ export const recentOrders = [
     orderId: "ORD001",
     userName: "張三",
     userAddress: "台北市萬華區成都路200號",
-    date: "2024-04-01",
+    date: "2024-11-01",
     totalAmount: 45.5,
     orderItems: [
       {
@@ -1048,15 +1048,15 @@ export const recentOrders = [
     ],
     paymentMethod: "信用卡",
     restaurantAddress: "台北市大安區仁愛路四段1號",
-    distance: "5公里",
+    distance: "5公裡",
     estimatedTime: "30分鐘",
-    timestamp: dayjs("2024-04-01T10:00:00Z"),
+    timestamp: dayjs("2024-11-01T10:00:00Z"),
   },
   {
     orderId: "ORD002",
     userName: "李四",
     userAddress: "高雄市左營區青海路90號",
-    date: "2024-04-02",
+    date: "2024-11-02",
     totalAmount: 30.0,
     orderItems: [
       {
@@ -1068,9 +1068,9 @@ export const recentOrders = [
     ],
     paymentMethod: "現金",
     restaurantAddress: "高雄市中正區忠孝西路一段100號",
-    distance: "3公里",
+    distance: "3公裡",
     estimatedTime: "20分鐘",
-    timestamp: dayjs("2024-04-02T12:30:00Z"),
+    timestamp: dayjs("2024-11-02T12:30:00Z"),
   },
   // 更多訂單...
 ];
@@ -1111,7 +1111,7 @@ export const adminOrders = [
     restaurantName: "阿香飯店",
     amount: 250,
     status: "新訂單",
-    orderTime: "2024-04-25 10:30",
+    orderTime: "2024-11-25 10:30",
     deliveryAddress: "台北市信義區松山路123號",
   },
   {
@@ -1121,8 +1121,8 @@ export const adminOrders = [
     restaurantName: "美味小館",
     amount: 180,
     status: "進行中",
-    orderTime: "2024-04-25 11:00",
-    deliveryAddress: "新北市板橋區中山路456號",
+    orderTime: "2024-11-25 11:00",
+    deliveryAddress: "高雄市楠梓區建楠路225號號",
   },
   {
     id: "3",
@@ -1131,8 +1131,8 @@ export const adminOrders = [
     restaurantName: "好味道餐廳",
     amount: 300,
     status: "已完成",
-    orderTime: "2024-04-24 09:15",
-    deliveryAddress: "台中市北區光復路789號",
+    orderTime: "2024-11-24 09:15",
+    deliveryAddress: "高雄市鼓山區美術東四路562號",
   },
   {
     id: "4",
@@ -1141,10 +1141,10 @@ export const adminOrders = [
     restaurantName: "香辣鍋",
     amount: 220,
     status: "取消",
-    orderTime: "2024-04-23 14:45",
+    orderTime: "2024-11-23 14:45",
     deliveryAddress: "高雄市左營區自由路101號",
   },
-  // 更多订单数据...
+  // 更多訂單數據...
 ];
 
 // 管理員用戶模擬數據
@@ -1173,7 +1173,7 @@ export const adminUsers = [
     role: "餐廳管理員",
     orderCount: 8,
   },
-  // 更多用户数据...
+  // 更多用戶數據...
 ];
 
 // 管理員餐廳模擬數據
@@ -1181,7 +1181,7 @@ export const adminRestaurants = [
   {
     id: "r1",
     name: "阿香飯店",
-    address: "台北市信義區松山路123號",
+    address: "高雄市岡山區河華路111號",
     status: "營業中",
     rating: 4.5,
     operatingHours: "週一至週日 10:00 - 22:00",
@@ -1190,7 +1190,7 @@ export const adminRestaurants = [
   {
     id: "r2",
     name: "美味小館",
-    address: "新北市板橋區中山路456號",
+    address: "高雄市鹽埕區五福四路258號",
     status: "休息中",
     rating: 4.2,
     operatingHours: "週一至週五 11:00 - 21:00",
@@ -1199,13 +1199,13 @@ export const adminRestaurants = [
   {
     id: "r3",
     name: "好味道餐廳",
-    address: "台中市北區光復路789號",
+    address: "高雄市新興區七賢二路16號",
     status: "營業中",
     rating: 4.8,
     operatingHours: "週一至週日 09:00 - 23:00",
     revenue: 75000,
   },
-  // 更多餐廳数据...
+  // 更多餐廳數據...
 ];
 
 // 系統監控模擬數據
@@ -1222,9 +1222,9 @@ export const systemMonitoring = {
     peakTrafficPercentage: 75, // 百分比
   },
   errorLogs: [
-    "2024-04-25 12:00:00 - 數據庫連接超時。",
-    "2024-04-24 16:30:00 - API 服務異常。",
-    // 更多错误日志...
+    "2024-11-25 12:00:00 - 數據庫連接超時。",
+    "2024-11-24 16:30:00 - API 服務異常。",
+    // 更多錯誤日志...
   ],
 };
 

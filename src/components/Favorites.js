@@ -14,7 +14,7 @@ const Favorites = ({
   showRestaurantModal,
   startOrder, // 接收 startOrder prop
 }) => {
-  // 筛选出收藏的餐厅
+  // 篩選出收藏的餐廳
   const favoriteRestaurants = restaurants.filter((restaurant) =>
     favorites.includes(restaurant.id)
   );
@@ -29,7 +29,7 @@ const Favorites = ({
               toggleFavorite={toggleFavorite}
               showRestaurantModal={showRestaurantModal}
               favorites={favorites}
-              startOrder={startOrder} // 传递 startOrder prop
+              startOrder={startOrder} // 傳遞 startOrder prop
             />
           </Col>
         ))
@@ -57,7 +57,7 @@ Favorites.propTypes = {
   ).isRequired,
   toggleFavorite: PropTypes.func.isRequired,
   showRestaurantModal: PropTypes.func.isRequired,
-  startOrder: PropTypes.func.isRequired, // 添加 startOrder prop 类型验证
+  startOrder: PropTypes.func.isRequired, // 添加 startOrder prop 類型驗證
 };
 
 export default Favorites;

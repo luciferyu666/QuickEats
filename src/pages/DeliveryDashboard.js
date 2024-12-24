@@ -180,7 +180,7 @@ const DeliveryDashboard = () => {
       key: "status",
       render: (status) => {
         let color = "default";
-        if (status === "在線") color = "green";
+        if (status === "線上") color = "green";
         if (status === "休息") color = "red";
         if (status === "離線") color = "default";
         return <Tag color={color}>{status}</Tag>;
@@ -257,10 +257,10 @@ const DeliveryDashboard = () => {
         <Card title="出勤管理" style={{ marginBottom: "20px" }}>
           <Space>
             <Button
-              type={currentStatus === "在線" ? "primary" : "default"}
-              onClick={() => handleAttendance("在線")}
+              type={currentStatus === "線上" ? "primary" : "default"}
+              onClick={() => handleAttendance("線上")}
             >
-              在線
+              線上
             </Button>
             <Button
               type={currentStatus === "休息" ? "primary" : "default"}
@@ -279,7 +279,7 @@ const DeliveryDashboard = () => {
             當前狀態：
             <Tag
               color={
-                currentStatus === "在線"
+                currentStatus === "線上"
                   ? "green"
                   : currentStatus === "休息"
                     ? "red"

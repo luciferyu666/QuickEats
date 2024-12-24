@@ -5,7 +5,7 @@ import { Layout, Menu, Badge } from "antd";
 import { ShoppingCartOutlined } from "@ant-design/icons";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
-import "./Header.css"; // 如果有自定义样式
+import "./Header.css"; // 如果有自定義樣式
 
 const { Header: AntHeader } = Layout;
 
@@ -14,7 +14,7 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 计算购物车中菜品的总数量
+  // 計算購物車中菜品的總數量
   const cartItemCount = cartItems.reduce(
     (total, item) => total + item.quantity,
     0

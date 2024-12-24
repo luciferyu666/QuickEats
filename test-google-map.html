@@ -1,0 +1,47 @@
+// C:\Tasker\QuickEats\quickeats-frontend\test-google-map.html
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Google Maps 測試</title>
+    <style>
+      /* 設置地圖容器大小 */
+      #map {
+        height: 100vh;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 style="">Google Maps 測試</h1>
+    <div id="map"></div>
+
+    <!-- 加載 Google Maps API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB9_ZVuKzLTZURhaYjaAaIhOjvwRPYu0SY"></script>
+    <script>
+      // 初始化地圖
+      function initMap() {
+        // 設置地圖中心（高雄市中心）
+        const center = { lat: 22.6273, lng: 120.3014 };
+
+        // 創建地圖
+        const map = new google.maps.Map(document.getElementById("map"), {
+          zoom: 14,
+          center: center,
+        });
+
+        // 添加標記
+        new google.maps.Marker({
+          position: center,
+          map: map,
+          title: "高雄市中心",
+        });
+      }
+
+      // 加載地圖
+      window.onload = initMap;
+    </script>
+  </body>
+</html>

@@ -1,16 +1,24 @@
-// src/App.js
-
 import React from "react";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-import "./App.css"; // 引入全局樣式（如有需要）
+import MapComponent from "./components/MapComponent"; // 引入 MapComponent
+import "./App.css"; // 引入全局樣式
 
 const App = () => {
   return (
     <>
+      {/* 頂部導航 */}
       <Header />
-      {/* 這裡的 AppRoutes 已經在 index.js 中被渲染，因此不需要在這裡再次引入 */}
-      {/* <AppRoutes /> */}
+
+      {/* 地圖組件 */}
+      <main>
+        <h1 style={{ textAlign: "center", margin: "20px 0" }}>
+          Google Maps 測試
+        </h1>
+        <MapComponent />
+      </main>
+
+      {/* 底部信息 */}
       <Footer />
     </>
   );

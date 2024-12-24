@@ -68,7 +68,7 @@ const RestaurantMenu = () => {
               >
                 <Card.Meta
                   title={menuItem.name}
-                  description={`价格: NT$${menuItem.price}`}
+                  description={`價格: NT$${menuItem.price}`}
                 />
                 <Paragraph>{menuItem.description}</Paragraph>
                 <Button
