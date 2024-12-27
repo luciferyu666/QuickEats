@@ -1,222 +1,403 @@
-import React from "react";
-import { Layout, Typography, Row, Col, Card, List } from "antd";
+// src/pages/AdminDashboard.js
+
+import React, { useMemo, useState } from "react";
+import {
+  Layout,
+  Typography,
+  Row,
+  Col,
+  Card,
+  List,
+  Statistic,
+  Divider,
+  Modal,
+  Button,
+  Table,
+} from "antd";
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import OrderManagement from "../components/admin/OrderManagement";
 import UserManagement from "../components/admin/UserManagement";
 import SystemMonitoring from "../components/admin/SystemMonitoring";
-import UserActivityChart from "../components/admin/UserActivityChart";
+import { transactions, customers } from "../data/mockData"; // 確保路徑正確
+import { deliveryData } from "../data/deliveryData"; // 新增導入
+import dayjs from "dayjs";
 
 const { Title } = Typography;
 const { Content } = Layout;
 
-// 模擬用戶活躍度數據
-const userActivityData = {
-  labels: ["2024-11-01", "2024-11-02", "2024-11-03", "2024-11-04"],
-  datasets: [
-    {
-      label: "活躍用戶數",
-      data: [12, 19, 3, 5],
-      backgroundColor: "rgba(75, 192, 192, 0.2)",
-      borderColor: "rgba(75, 192, 192, 1)",
-      borderWidth: 1,
-    },
-  ],
-};
+// 顏色定義，用於餅圖
+const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#AA336A"];
 
-// 模擬用戶活躍度排行數據
-const topUsers = [
-  { id: "u1", name: "張三", activity: 150 },
-  { id: "u2", name: "李四", activity: 120 },
-  { id: "u3", name: "王五", activity: 100 },
-];
-
-// 隨機生成 40 個 3 個字的用戶姓名
-const generateChineseName = () => {
-  const firstNames = [
-    "張",
-    "李",
-    "王",
-    "趙",
-    "劉",
-    "陳",
-    "楊",
-    "黃",
-    "吳",
-    "周",
-  ];
-  const lastNames = [
-    "偉",
-    "敏",
-    "軍",
-    "傑",
-    "婷",
-    "強",
-    "平",
-    "輝",
-    "霞",
-    "龍",
-  ];
-  return `${firstNames[Math.floor(Math.random() * firstNames.length)]}${lastNames[Math.floor(Math.random() * lastNames.length)]}${lastNames[Math.floor(Math.random() * lastNames.length)]}`;
-};
-
-const randomUsers = Array.from({ length: 40 }, (_, index) => ({
-  id: `user${index + 1}`,
-  name: generateChineseName(),
-}));
-
-// 餐廳數據硬編碼
-const restaurantData = [
-  {
-    name: "美味漢堡",
-    cuisine: "美式",
-    rating: 4.5,
-    status: "營業中",
-    address: "高雄市鼓山區文信路198號",
-  },
-  {
-    name: "壽司之神",
-    cuisine: "日本料理",
-    rating: 4.8,
-    status: "營業中",
-    address: "高雄市鼓山區民利街5號",
-  },
-  {
-    name: "庒稼村食品行",
-    cuisine: "中式",
-    rating: 4.2,
-    status: "營業中",
-    address: "高雄市鳥松區美山路39號",
-  },
-  {
-    name: "幸福美味",
-    cuisine: "台式",
-    rating: 4.7,
-    status: "營業中",
-    address: "高雄市左營區自由路100號",
-  },
-  {
-    name: "天天快餐",
-    cuisine: "中式",
-    rating: 4.1,
-    status: "營業中",
-    address: "台北市中正區忠孝東路1段50號",
-  },
-  {
-    name: "味道之家",
-    cuisine: "中式",
-    rating: 4.3,
-    status: "休息中",
-    address: "高雄市鼓山區美術東四路50號",
-  },
-  {
-    name: "享受韓國料理",
-    cuisine: "韓式",
-    rating: 4.9,
-    status: "營業中",
-    address: "高雄市苓雅區光華一路148之76號2樓之1",
-  },
-  {
-    name: "阿香飯店",
-    cuisine: "台式",
-    rating: 4.5,
-    status: "營業中",
-    address: "高雄市岡山區河華路111號",
-  },
-  {
-    name: "美味小館",
-    cuisine: "中式",
-    rating: 4.2,
-    status: "休息中",
-    address: "高雄市鹽埕區五福四路258號",
-  },
-  {
-    name: "好味道餐廳",
-    cuisine: "中式",
-    rating: 4.8,
-    status: "營業中",
-    address: "高雄市新興區七賢二路16號",
-  },
-  {
-    name: "正宗川菜館",
-    cuisine: "川菜",
-    rating: 4.6,
-    status: "營業中",
-    address: "高雄市左營區自由路88號",
-  },
-  {
-    name: "海鮮大排檔",
-    cuisine: "海鮮",
-    rating: 4.7,
-    status: "營業中",
-    address: "高雄市鳳山區海鮮街200號",
-  },
-  {
-    name: "意大利風味餐廳",
-    cuisine: "意大利菜",
-    rating: 4.8,
-    status: "營業中",
-    address: "高雄市鼓山區文龍街66號",
-  },
-  {
-    name: "法式料理",
-    cuisine: "法國菜",
-    rating: 4.9,
-    status: "營業中",
-    address: "高雄市苓雅區文華路188號",
-  },
-  {
-    name: "健康輕食",
-    cuisine: "健康餐",
-    rating: 4.4,
-    status: "營業中",
-    address: "高雄市鳥松區健康街88號",
-  },
-  {
-    name: "中東風味餐廳",
-    cuisine: "中東菜",
-    rating: 4.3,
-    status: "休息中",
-    address: "高雄市三民區民族街22號",
-  },
-  {
-    name: "燒烤天堂",
-    cuisine: "燒烤",
-    rating: 4.5,
-    status: "營業中",
-    address: "高雄市前鎮區燒烤路123號",
-  },
-  {
-    name: "素食之家",
-    cuisine: "素食",
-    rating: 4.2,
-    status: "營業中",
-    address: "高雄市左營區素食路45號",
-  },
-  {
-    name: "泰式風味餐廳",
-    cuisine: "泰國菜",
-    rating: 4.7,
-    status: "營業中",
-    address: "高雄市鼓山區民族大道89號",
-  },
-  {
-    name: "墨西哥風味館",
-    cuisine: "墨西哥菜",
-    rating: 4.6,
-    status: "營業中",
-    address: "高雄市前鎮區自由路300號",
-  },
-  {
-    name: "韓國炸雞",
-    cuisine: "韓式",
-    rating: 4.5,
-    status: "營業中",
-    address: "高雄市左營區香雞路8號",
-  },
-];
+// 顏色定義，用於配送餅圖
+const DELIVERY_COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#8dd1e1"];
 
 const AdminDashboard = () => {
+  // 狀態管理，用於控制客戶、餐廳和配送員模態框的顯示和選中的項目
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [isCustomerModalVisible, setIsCustomerModalVisible] = useState(false);
+  const [selectedRestaurant, setSelectedRestaurant] = useState(null);
+  const [isRestaurantModalVisible, setIsRestaurantModalVisible] =
+    useState(false);
+
+  // 新增狀態管理：選中的配送員和其配送記錄
+  const [selectedDeliveryPerson, setSelectedDeliveryPerson] = useState(null);
+  const [isDeliveryPersonModalVisible, setIsDeliveryPersonModalVisible] =
+    useState(false);
+  const [
+    selectedDeliveryPersonDeliveries,
+    setSelectedDeliveryPersonDeliveries,
+  ] = useState([]);
+
+  // 使用 useMemo 來優化性能，避免不必要的重新計算
+  const {
+    totalSales,
+    monthlySalesData,
+    dishSalesData,
+    activeCustomersCount,
+    newCustomersCount,
+    returningCustomersCount,
+    topActiveCustomers,
+    orderStatusDistribution,
+    orderStatusCounts,
+    restaurantSalesData,
+    mostPopularRestaurant,
+    restaurantOrderCounts,
+    totalDeliveries,
+    deliveriesPerPerson,
+    averageDeliveryTime,
+    averageRatingPerPerson,
+    deliveryStatusDistribution,
+    transactionsWithTimestamps,
+  } = useMemo(() => {
+    // 總銷售額
+    const totalSales = transactions.reduce(
+      (sum, txn) => sum + txn.totalAmount,
+      0
+    );
+
+    // 銷售趨勢（按月）
+    const monthlySalesMap = {};
+    transactions.forEach((txn) => {
+      const month = dayjs(txn.timestamp).format("YYYY-MM");
+      if (!monthlySalesMap[month]) {
+        monthlySalesMap[month] = 0;
+      }
+      monthlySalesMap[month] += txn.totalAmount;
+    });
+    const monthlySalesData = Object.keys(monthlySalesMap)
+      .sort()
+      .map((month) => ({ month, sales: monthlySalesMap[month] }));
+
+    // 各菜品銷售量
+    const dishSalesMap = {};
+    transactions.forEach((txn) => {
+      txn.orderItems.forEach((item) => {
+        if (!dishSalesMap[item.name]) {
+          dishSalesMap[item.name] = 0;
+        }
+        dishSalesMap[item.name] += item.quantity;
+      });
+    });
+    const dishSalesData = Object.keys(dishSalesMap).map((dish) => ({
+      name: dish,
+      quantity: dishSalesMap[dish],
+    }));
+
+    // 活躍客戶數量（唯一用戶數）
+    const uniqueUsers = new Set(transactions.map((txn) => txn.userName));
+    const activeCustomersCount = uniqueUsers.size;
+
+    // 新客戶 vs 回頭客
+    const userFirstOrderMap = {};
+    transactions.forEach((txn) => {
+      if (
+        !userFirstOrderMap[txn.userName] ||
+        dayjs(txn.timestamp).isBefore(userFirstOrderMap[txn.userName])
+      ) {
+        userFirstOrderMap[txn.userName] = txn.timestamp;
+      }
+    });
+
+    const now = dayjs();
+    let newCustomersCount = 0;
+    let returningCustomersCount = 0;
+    Object.values(userFirstOrderMap).forEach((firstOrderTime) => {
+      if (now.diff(firstOrderTime, "month") < 1) {
+        newCustomersCount += 1;
+      } else {
+        returningCustomersCount += 1;
+      }
+    });
+
+    // 活躍客戶排行榜（按訂單數排序，取前十名）
+    const userOrderCountMap = {};
+    transactions.forEach((txn) => {
+      if (!userOrderCountMap[txn.userName]) {
+        userOrderCountMap[txn.userName] = 0;
+      }
+      userOrderCountMap[txn.userName] += 1;
+    });
+    const topActiveCustomers = Object.entries(userOrderCountMap)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10) // 修改為取前 10 名
+      .map(([name, count]) => ({ name, count }));
+
+    // 訂單狀態分佈
+    const orderStatusMap = {};
+    transactions.forEach((txn) => {
+      if (!orderStatusMap[txn.status]) {
+        orderStatusMap[txn.status] = 0;
+      }
+      orderStatusMap[txn.status] += 1;
+    });
+    const orderStatusDistribution = Object.keys(orderStatusMap).map(
+      (status) => ({
+        name: status,
+        value: orderStatusMap[status],
+      })
+    );
+    const orderStatusCounts = orderStatusMap;
+
+    // 餐廳銷售額
+    const restaurantSalesMap = {};
+    transactions.forEach((txn) => {
+      if (!restaurantSalesMap[txn.restaurant]) {
+        restaurantSalesMap[txn.restaurant] = 0;
+      }
+      restaurantSalesMap[txn.restaurant] += txn.totalAmount;
+    });
+    const restaurantSalesData = Object.keys(restaurantSalesMap).map(
+      (restaurant) => ({
+        name: restaurant,
+        sales: restaurantSalesMap[restaurant],
+      })
+    );
+
+    // 最受歡迎的餐廳（按銷售額排序，取第一名）
+    const mostPopularRestaurant = restaurantSalesData.sort(
+      (a, b) => b.sales - a.sales
+    )[0];
+
+    // 餐廳訂單數量
+    const restaurantOrderCountMap = {};
+    transactions.forEach((txn) => {
+      if (!restaurantOrderCountMap[txn.restaurant]) {
+        restaurantOrderCountMap[txn.restaurant] = 0;
+      }
+      restaurantOrderCountMap[txn.restaurant] += 1;
+    });
+    const restaurantOrderCounts = Object.keys(restaurantOrderCountMap).map(
+      (restaurant) => ({
+        name: restaurant,
+        orders: restaurantOrderCountMap[restaurant],
+      })
+    );
+
+    // ====== 新增部分：配送數據處理 ======
+
+    // 建立以 orderId 為鍵的配送數據映射
+    const deliveryMap = deliveryData.reduce((map, delivery) => {
+      map[delivery.orderId] = delivery;
+      return map;
+    }, {});
+
+    // 總配送數量
+    const totalDeliveries = deliveryData.length;
+
+    // 各配送員的配送次數
+    const deliveriesPerPersonMap = {};
+    deliveryData.forEach((delivery) => {
+      if (!deliveriesPerPersonMap[delivery.deliveryPerson]) {
+        deliveriesPerPersonMap[delivery.deliveryPerson] = 0;
+      }
+      deliveriesPerPersonMap[delivery.deliveryPerson] += 1;
+    });
+    const deliveriesPerPerson = Object.keys(deliveriesPerPersonMap).map(
+      (person) => ({
+        name: person,
+        count: deliveriesPerPersonMap[person],
+      })
+    );
+
+    // 平均配送時間（分鐘）
+    const totalDeliveryTime = deliveryData.reduce((sum, delivery) => {
+      if (delivery.pickUpTime && delivery.deliveryTime) {
+        return sum + delivery.deliveryTime.diff(delivery.pickUpTime, "minute");
+      }
+      return sum;
+    }, 0);
+    const averageDeliveryTime =
+      deliveryData.length > 0
+        ? (totalDeliveryTime / deliveryData.length).toFixed(2)
+        : 0;
+
+    // 各配送員的平均評分
+    const ratingMap = {};
+    const ratingCountMap = {};
+    deliveryData.forEach((delivery) => {
+      if (delivery.rating !== null && delivery.rating !== undefined) {
+        if (!ratingMap[delivery.deliveryPerson]) {
+          ratingMap[delivery.deliveryPerson] = 0;
+          ratingCountMap[delivery.deliveryPerson] = 0;
+        }
+        ratingMap[delivery.deliveryPerson] += delivery.rating;
+        ratingCountMap[delivery.deliveryPerson] += 1;
+      }
+    });
+    const averageRatingPerPerson = Object.keys(ratingMap).map((person) => ({
+      name: person,
+      averageRating: (ratingMap[person] / ratingCountMap[person]).toFixed(2),
+    }));
+
+    // 配送狀態分佈
+    const deliveryStatusMap = {};
+    deliveryData.forEach((delivery) => {
+      if (!deliveryStatusMap[delivery.status]) {
+        deliveryStatusMap[delivery.status] = 0;
+      }
+      deliveryStatusMap[delivery.status] += 1;
+    });
+    const deliveryStatusDistribution = Object.keys(deliveryStatusMap).map(
+      (status) => ({
+        name: status,
+        value: deliveryStatusMap[status],
+      })
+    );
+
+    // 將所有交易數據添加時間戳格式化
+    const transactionsWithTimestamps = transactions.map((txn) => ({
+      ...txn,
+      formattedTimestamp: dayjs(txn.timestamp).format("YYYY-MM-DD HH:mm:ss"),
+    }));
+
+    return {
+      totalSales,
+      monthlySalesData,
+      dishSalesData,
+      activeCustomersCount,
+      newCustomersCount,
+      returningCustomersCount,
+      topActiveCustomers,
+      orderStatusDistribution,
+      orderStatusCounts,
+      restaurantSalesData,
+      mostPopularRestaurant,
+      restaurantOrderCounts,
+      // 新增返回的配送數據
+      totalDeliveries,
+      deliveriesPerPerson,
+      averageDeliveryTime,
+      averageRatingPerPerson,
+      deliveryStatusDistribution,
+      transactionsWithTimestamps,
+    };
+  }, [transactions, deliveryData]); // 添加 deliveryData 作為依賴
+
+  // 處理客戶點擊事件
+  const handleCustomerClick = (customerName) => {
+    // 根據客戶名稱在 customers 列表中找到該客戶的詳細信息
+    const customer = customers.find((cust) => cust.name === customerName);
+    if (customer) {
+      setSelectedCustomer(customer);
+      setIsCustomerModalVisible(true);
+    }
+  };
+
+  const handleCustomerModalClose = () => {
+    setSelectedCustomer(null);
+    setIsCustomerModalVisible(false);
+  };
+
+  // 處理餐廳點擊事件
+  const handleRestaurantClick = (restaurantName) => {
+    // 根據餐廳名稱在 transactions 列表中找到該餐廳的詳細信息
+    const txn = transactions.find((txn) => txn.restaurant === restaurantName);
+    if (txn) {
+      const restaurant = {
+        name: txn.restaurant,
+        address: txn.restaurantAddress,
+        location: txn.restaurantLocation,
+        // 可以根據需要添加更多詳細信息
+      };
+      setSelectedRestaurant(restaurant);
+      setIsRestaurantModalVisible(true);
+    }
+  };
+
+  const handleRestaurantModalClose = () => {
+    setSelectedRestaurant(null);
+    setIsRestaurantModalVisible(false);
+  };
+
+  // 新增：處理配送員點擊事件
+  const handleDeliveryPersonClick = (deliveryPersonName) => {
+    // 根據配送員名稱在 deliveryData 列表中找到所有相關的配送記錄
+    const deliveries = deliveryData.filter(
+      (delivery) => delivery.deliveryPerson === deliveryPersonName
+    );
+    if (deliveries.length > 0) {
+      setSelectedDeliveryPerson(deliveryPersonName);
+      setSelectedDeliveryPersonDeliveries(deliveries);
+      setIsDeliveryPersonModalVisible(true);
+    }
+  };
+
+  const handleDeliveryPersonModalClose = () => {
+    setSelectedDeliveryPerson(null);
+    setSelectedDeliveryPersonDeliveries([]);
+    setIsDeliveryPersonModalVisible(false);
+  };
+
+  // 定義交易數據表格的列
+  const transactionsColumns = [
+    {
+      title: "訂單 ID",
+      dataIndex: "orderId",
+      key: "orderId",
+    },
+    {
+      title: "用戶名稱",
+      dataIndex: "userName",
+      key: "userName",
+    },
+    {
+      title: "餐廳",
+      dataIndex: "restaurant",
+      key: "restaurant",
+    },
+    {
+      title: "總金額 (NT$)",
+      dataIndex: "totalAmount",
+      key: "totalAmount",
+      render: (value) => `NT$${value.toFixed(2)}`,
+    },
+    {
+      title: "狀態",
+      dataIndex: "status",
+      key: "status",
+    },
+    {
+      title: "時間戳",
+      dataIndex: "formattedTimestamp",
+      key: "formattedTimestamp",
+    },
+  ];
+
   return (
     <Layout>
       <Header />
@@ -225,6 +406,347 @@ const AdminDashboard = () => {
         style={{ padding: "20px 50px" }}
       >
         <Title level={2}>管理員主頁</Title>
+
+        {/* 銷售數據 */}
+        <Card title="銷售數據" style={{ marginBottom: "20px" }}>
+          <Row gutter={[16, 16]}>
+            <Col xs={24} sm={12} md={6}>
+              <Statistic
+                title="總銷售額"
+                value={totalSales}
+                precision={2}
+                valueStyle={{ color: "#3f8600" }}
+                prefix="NT$"
+              />
+            </Col>
+            <Col xs={24} sm={12} md={18}>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={monthlySalesData}>
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip
+                    labelFormatter={(label) => `月份: ${label}`}
+                    formatter={(value) => [`NT$${value.toFixed(2)}`, "銷售額"]}
+                  />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="sales"
+                    stroke="#8884d8"
+                    name="銷售額"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </Col>
+          </Row>
+          <Divider />
+          <Title level={4}>各菜品銷售量</Title>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={dishSalesData}>
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip
+                formatter={(value) => [`${value}`, "銷售量"]}
+                labelFormatter={(label) => `菜品: ${label}`}
+              />
+              <Legend />
+              <Bar dataKey="quantity" fill="#82ca9d" name="銷售量" />
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
+
+        {/* 客戶活躍度 */}
+        <Card title="客戶活躍度" style={{ marginBottom: "20px" }}>
+          <Row gutter={[16, 16]}>
+            <Col xs={24} sm={8} md={8}>
+              <Statistic
+                title="活躍客戶數量"
+                value={activeCustomersCount}
+                valueStyle={{ color: "#1890ff" }}
+              />
+            </Col>
+            <Col xs={24} sm={8} md={8}>
+              <Statistic
+                title="新客戶"
+                value={newCustomersCount}
+                valueStyle={{ color: "#faad14" }}
+              />
+            </Col>
+            <Col xs={24} sm={8} md={8}>
+              <Statistic
+                title="回頭客"
+                value={returningCustomersCount}
+                valueStyle={{ color: "#f5222d" }}
+              />
+            </Col>
+          </Row>
+          <Divider />
+          <Title level={4}>活躍客戶排行榜（前 10 名）</Title>
+          <List
+            dataSource={topActiveCustomers}
+            renderItem={(user, index) => (
+              <List.Item key={user.name}>
+                <List.Item.Meta
+                  title={
+                    <Button
+                      type="link"
+                      onClick={() => handleCustomerClick(user.name)}
+                    >
+                      {index + 1}. {user.name}
+                    </Button>
+                  }
+                  description={`訂單數量: ${user.count}`}
+                />
+              </List.Item>
+            )}
+          />
+        </Card>
+
+        {/* 訂單狀態分佈 */}
+        <Card title="訂單狀態分佈" style={{ marginBottom: "20px" }}>
+          <Row gutter={[16, 16]}>
+            <Col xs={24} sm={12} md={12}>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={orderStatusDistribution}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                    label
+                  >
+                    {orderStatusDistribution.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </Col>
+            <Col xs={24} sm={12} md={12}>
+              <List
+                header={<div>各狀態訂單數量</div>}
+                bordered
+                dataSource={Object.entries(orderStatusCounts)}
+                renderItem={([status, count]) => (
+                  <List.Item key={status}>
+                    <List.Item.Meta
+                      title={status}
+                      description={`數量: ${count}`}
+                    />
+                  </List.Item>
+                )}
+              />
+            </Col>
+          </Row>
+        </Card>
+
+        {/* 餐廳表現 */}
+        <Card title="餐廳表現" style={{ marginBottom: "20px" }}>
+          <Row gutter={[16, 16]}>
+            <Col xs={24} sm={24} md={8}>
+              <Title level={4}>各餐廳銷售額</Title>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={restaurantSalesData}>
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip
+                    labelFormatter={(label) => `餐廳: ${label}`}
+                    formatter={(value) => [`NT$${value.toFixed(2)}`, "銷售額"]}
+                  />
+                  <Legend />
+                  <Bar
+                    dataKey="sales"
+                    fill="#8884d8"
+                    name="銷售額"
+                    onClick={(data) => handleRestaurantClick(data.name)} // 添加 onClick 事件
+                    cursor="pointer" // 更改鼠標樣式為指針，提示用戶可以點擊
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </Col>
+            <Col xs={24} sm={24} md={8}>
+              <Title level={4}>最受歡迎的餐廳</Title>
+              {mostPopularRestaurant ? (
+                <Card>
+                  <p>
+                    <strong>名稱：</strong> {mostPopularRestaurant.name}
+                  </p>
+                  <p>
+                    <strong>銷售額：</strong> NT$
+                    {mostPopularRestaurant.sales.toFixed(2)}
+                  </p>
+                  <p>
+                    <strong>日期：</strong>{" "}
+                    {dayjs(mostPopularRestaurant.timestamp).format(
+                      "YYYY-MM-DD"
+                    )}
+                  </p>
+                </Card>
+              ) : (
+                <p>暫無數據</p>
+              )}
+            </Col>
+            <Col xs={24} sm={24} md={8}>
+              <Title level={4}>餐廳訂單數量</Title>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={restaurantOrderCounts}>
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip
+                    labelFormatter={(label) => `餐廳: ${label}`}
+                    formatter={(value) => [`${value}`, "訂單數量"]}
+                  />
+                  <Legend />
+                  <Bar
+                    dataKey="orders"
+                    fill="#82ca9d"
+                    name="訂單數量"
+                    onClick={(data) => handleRestaurantClick(data.name)} // 添加 onClick 事件
+                    cursor="pointer" // 更改鼠標樣式為指針，提示用戶可以點擊
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </Col>
+          </Row>
+        </Card>
+
+        {/* ====== 新增部分：配送數據展示 ====== */}
+        <Card title="配送數據" style={{ marginBottom: "20px" }}>
+          <Row gutter={[16, 16]}>
+            {/* 總配送數量 */}
+            <Col xs={24} sm={12} md={6}>
+              <Statistic
+                title="總配送數量"
+                value={totalDeliveries}
+                valueStyle={{ color: "#3f8600" }}
+              />
+            </Col>
+
+            {/* 各配送員的配送次數 */}
+            <Col xs={24} sm={12} md={6}>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={deliveriesPerPerson}>
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip
+                    labelFormatter={(label) => `配送員: ${label}`}
+                    formatter={(value) => [`${value}`, "配送次數"]}
+                  />
+                  <Legend />
+                  <Bar
+                    dataKey="count"
+                    fill="#82ca9d"
+                    name="配送次數"
+                    onClick={(data) => handleDeliveryPersonClick(data.name)} // 添加 onClick 事件
+                    cursor="pointer" // 更改鼠標樣式為指針，提示用戶可以點擊
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </Col>
+
+            {/* 平均配送時間 */}
+            <Col xs={24} sm={12} md={6}>
+              <Statistic
+                title="平均配送時間 (分鐘)"
+                value={averageDeliveryTime}
+                valueStyle={{ color: "#1890ff" }}
+              />
+            </Col>
+
+            {/* 各配送員的平均評分 */}
+            <Col xs={24} sm={12} md={6}>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={averageRatingPerPerson}>
+                  <XAxis dataKey="name" />
+                  <YAxis domain={[0, 5]} />
+                  <Tooltip
+                    labelFormatter={(label) => `配送員: ${label}`}
+                    formatter={(value) => [`${value}`, "平均評分"]}
+                  />
+                  <Legend />
+                  <Bar dataKey="averageRating" fill="#8884d8" name="平均評分" />
+                </BarChart>
+              </ResponsiveContainer>
+            </Col>
+          </Row>
+          <Divider />
+          <Row gutter={[16, 16]}>
+            {/* 配送狀態分佈餅圖 */}
+            <Col xs={24} sm={12} md={12}>
+              <Title level={4}>配送狀態分佈</Title>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={deliveryStatusDistribution}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                    label
+                  >
+                    {deliveryStatusDistribution.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={DELIVERY_COLORS[index % DELIVERY_COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </Col>
+
+            {/* 配送員評分分佈餅圖 */}
+            <Col xs={24} sm={12} md={12}>
+              <Title level={4}>配送員評分分佈</Title>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={averageRatingPerPerson}
+                    dataKey="averageRating"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                    label
+                  >
+                    {averageRatingPerPerson.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={DELIVERY_COLORS[index % DELIVERY_COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </Col>
+          </Row>
+        </Card>
+        {/* ====== 配送數據展示結束 ====== */}
+
+        {/* 交易數據表格 */}
+        <Card title="所有交易記錄" style={{ marginBottom: "20px" }}>
+          <Table
+            dataSource={transactionsWithTimestamps}
+            columns={transactionsColumns}
+            rowKey="orderId"
+            pagination={{ pageSize: 10 }}
+            scroll={{ x: "100%" }}
+          />
+        </Card>
+
+        {/* 其他管理員功能 */}
         <Row gutter={[16, 16]}>
           <Col xs={24} sm={24} md={12} lg={12}>
             <Card title="訂單管理">
@@ -235,12 +757,16 @@ const AdminDashboard = () => {
             <Card title="用戶管理">
               <List
                 itemLayout="horizontal"
-                dataSource={randomUsers}
+                dataSource={transactions.map((txn) => ({
+                  id: txn.orderId,
+                  name: txn.userName,
+                  email: txn.userEmail,
+                }))}
                 renderItem={(user) => (
                   <List.Item key={user.id}>
                     <List.Item.Meta
                       title={user.name}
-                      description={`用戶 ID: ${user.id}`}
+                      description={user.email}
                     />
                   </List.Item>
                 )}
@@ -249,20 +775,20 @@ const AdminDashboard = () => {
             </Card>
           </Col>
         </Row>
+
         <Row gutter={[16, 16]} style={{ marginTop: "20px" }}>
           <Col xs={24} sm={24} md={12} lg={12}>
             <Card title="餐廳管理">
               <List
                 itemLayout="vertical"
                 size="large"
-                dataSource={restaurantData}
+                dataSource={restaurantSalesData}
                 renderItem={(restaurant) => (
                   <List.Item key={restaurant.name}>
                     <List.Item.Meta
-                      title={`${restaurant.name} (${restaurant.cuisine})`}
-                      description={`評分: ${restaurant.rating} | 狀態: ${restaurant.status}`}
+                      title={`${restaurant.name}`}
+                      description={`銷售額: NT$${restaurant.sales.toFixed(2)}`}
                     />
-                    地址: {restaurant.address}
                   </List.Item>
                 )}
                 style={{ maxHeight: "300px", overflowY: "auto" }}
@@ -275,24 +801,142 @@ const AdminDashboard = () => {
             </Card>
           </Col>
         </Row>
-        <Row gutter={[16, 16]} style={{ marginTop: "20px" }}>
-          <Col xs={24} sm={24} md={24} lg={24}>
-            <Card title="用戶活躍度">
-              <UserActivityChart data={userActivityData} />
-              <List
-                header={<div>活躍用戶排行（前 3 名）</div>}
-                bordered
-                dataSource={topUsers}
-                renderItem={(user) => (
-                  <List.Item>
-                    {user.name} - 活躍度: {user.activity}
-                  </List.Item>
-                )}
-                style={{ marginTop: "20px" }}
-              />
-            </Card>
-          </Col>
-        </Row>
+
+        {/* 客戶詳細資訊模態框 */}
+        <Modal
+          title="客戶詳細資訊"
+          visible={isCustomerModalVisible}
+          onCancel={handleCustomerModalClose}
+          footer={[
+            <Button key="close" onClick={handleCustomerModalClose}>
+              關閉
+            </Button>,
+          ]}
+        >
+          {selectedCustomer ? (
+            <div>
+              <p>
+                <strong>ID：</strong> {selectedCustomer.id}
+              </p>
+              <p>
+                <strong>名稱：</strong> {selectedCustomer.name}
+              </p>
+              <p>
+                <strong>電子郵件：</strong> {selectedCustomer.email}
+              </p>
+              <p>
+                <strong>電話：</strong> {selectedCustomer.phone}
+              </p>
+              <p>
+                <strong>地址：</strong> {selectedCustomer.address}
+              </p>
+            </div>
+          ) : (
+            <p>暫無數據</p>
+          )}
+        </Modal>
+
+        {/* 餐廳詳細資訊模態框 */}
+        <Modal
+          title="餐廳詳細資訊"
+          visible={isRestaurantModalVisible}
+          onCancel={handleRestaurantModalClose}
+          footer={[
+            <Button key="close" onClick={handleRestaurantModalClose}>
+              關閉
+            </Button>,
+          ]}
+        >
+          {selectedRestaurant ? (
+            <div>
+              <p>
+                <strong>名稱：</strong> {selectedRestaurant.name}
+              </p>
+              <p>
+                <strong>地址：</strong> {selectedRestaurant.address}
+              </p>
+              <p>
+                <strong>地點：</strong> Lat: {selectedRestaurant.location.lat},
+                Lng: {selectedRestaurant.location.lng}
+              </p>
+              {/* 根據需要添加更多詳細信息 */}
+            </div>
+          ) : (
+            <p>暫無數據</p>
+          )}
+        </Modal>
+
+        {/* ====== 新增部分：配送員詳細資訊模態框 ====== */}
+        <Modal
+          title={`配送員詳細資訊 - ${selectedDeliveryPerson}`}
+          visible={isDeliveryPersonModalVisible}
+          onCancel={handleDeliveryPersonModalClose}
+          footer={[
+            <Button key="close" onClick={handleDeliveryPersonModalClose}>
+              關閉
+            </Button>,
+          ]}
+          width={800}
+        >
+          {selectedDeliveryPersonDeliveries.length > 0 ? (
+            <List
+              itemLayout="vertical"
+              size="large"
+              dataSource={selectedDeliveryPersonDeliveries}
+              renderItem={(delivery) => (
+                <List.Item key={delivery.deliveryId}>
+                  <List.Item.Meta
+                    title={`訂單ID: ${delivery.orderId}`}
+                    description={
+                      <div>
+                        <p>
+                          <strong>配送員：</strong> {delivery.deliveryPerson}
+                        </p>
+                        <p>
+                          <strong>取貨時間：</strong>{" "}
+                          {dayjs(delivery.pickUpTime).format(
+                            "YYYY-MM-DD HH:mm:ss"
+                          )}
+                        </p>
+                        <p>
+                          <strong>配送時間：</strong>{" "}
+                          {dayjs(delivery.deliveryTime).format(
+                            "YYYY-MM-DD HH:mm:ss"
+                          )}
+                        </p>
+                        <p>
+                          <strong>配送狀態：</strong> {delivery.status}
+                        </p>
+                        <p>
+                          <strong>評分：</strong>{" "}
+                          {delivery.rating ? delivery.rating : "無評分"}
+                        </p>
+                        <p>
+                          <strong>配送路線：</strong>
+                        </p>
+                        <List
+                          dataSource={delivery.route}
+                          renderItem={(routePoint, index) => (
+                            <List.Item key={index}>
+                              {index === 0 ? "餐廳位置：" : "用戶位置："} Lat:{" "}
+                              {routePoint.lat}, Lng: {routePoint.lng}
+                            </List.Item>
+                          )}
+                          size="small"
+                          bordered
+                        />
+                      </div>
+                    }
+                  />
+                </List.Item>
+              )}
+              style={{ maxHeight: "600px", overflowY: "auto" }}
+            />
+          ) : (
+            <p>暫無配送記錄</p>
+          )}
+        </Modal>
+        {/* ====== 配送員詳細資訊模態框結束 ====== */}
       </Content>
       <Footer />
     </Layout>
