@@ -1,6 +1,6 @@
 // src/pages/DeliveryDashboard.js
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Layout,
   Typography,
@@ -25,11 +25,11 @@ import {
 import AppHeader from "../components/Header";
 import AppFooter from "../components/Footer";
 import {
-  deliveryPerson,
+  deliveryPerson as mockDeliveryPerson,
   pendingOrders,
   completedOrders,
   workLogs,
-  notifications, // 修正為 'notifications'
+  notifications,
 } from "../data/mockData";
 import MapComponent from "../components/MapComponent";
 import NotificationHandler from "../components/NotificationHandler";
@@ -48,7 +48,11 @@ const DeliveryDashboard = () => {
   const [isMapModalVisible, setIsMapModalVisible] = useState(false);
   const [currentStatus, setCurrentStatus] = useState("離線");
   const [logs, setLogs] = useState(workLogs);
-  const [notificationsList, setNotificationsList] = useState(notifications); // 使用 'notifications'
+  const [notificationsList, setNotificationsList] = useState(notifications);
+
+  // 設定外送員的狀態
+  const [deliveryPersonState, setDeliveryPersonState] =
+    useState(mockDeliveryPerson);
 
   // 處理訂單狀態更新並推送通知
   const handleUpdateStatus = (order, newStatus) => {
@@ -68,7 +72,6 @@ const DeliveryDashboard = () => {
       message.success(`訂單 ${order.orderId} 已標記為已完成！`);
       pushNotification(order, newStatus);
     } else if (["已接單", "取餐中", "已取餐", "配送中"].includes(newStatus)) {
-      // 添加 "已取餐" 狀態
       // 更新訂單狀態
       setOrders((prev) =>
         prev.map((o) =>
@@ -94,7 +97,6 @@ const DeliveryDashboard = () => {
       timestamp: new Date().toLocaleString(),
     };
     setNotificationsList((prev) => [notification, ...prev]);
-    // 在 NotificationHandler 組件中顯示通知
   };
 
   // 顯示訂單詳情模態框
@@ -239,16 +241,71 @@ const DeliveryDashboard = () => {
     </Menu>
   );
 
+  // 模擬外送員位置移動
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDeliveryPersonState((prev) => {
+        // 獲取正在配送中的訂單
+        const targetOrder = orders.find((order) => order.status === "配送中");
+
+        if (targetOrder) {
+          const { dropoff } = targetOrder;
+          const { lat, lng } = prev.currentLocation;
+          const step = 0.0001; // 移動步長
+
+          let newLat = lat;
+          let newLng = lng;
+
+          // 簡單地向送達地點移動
+          if (lat < dropoff.lat) newLat += step;
+          if (lat > dropoff.lat) newLat -= step;
+          if (lng < dropoff.lng) newLng += step;
+          if (lng > dropoff.lng) newLng -= step;
+
+          // 檢查是否到達目標
+          if (
+            Math.abs(newLat - dropoff.lat) < step &&
+            Math.abs(newLng - dropoff.lng) < step
+          ) {
+            // 到達送達地點，更新訂單狀態
+            handleUpdateStatus(targetOrder, "已送達");
+            return {
+              ...prev,
+              currentLocation: { lat: dropoff.lat, lng: dropoff.lng },
+            };
+          }
+
+          return {
+            ...prev,
+            currentLocation: { lat: newLat, lng: newLng },
+          };
+        }
+
+        return prev;
+      });
+    }, 1000); // 每秒更新一次位置
+
+    return () => clearInterval(interval);
+  }, [orders]);
+
+  // 調試：打印 selectedOrder 和 deliveryPersonState.currentLocation
+  useEffect(() => {
+    console.log("Selected Order:", selectedOrder);
+    console.log(
+      "Delivery Person Location:",
+      deliveryPersonState.currentLocation
+    );
+  }, [selectedOrder, deliveryPersonState]);
+
   return (
     <Layout>
       <AppHeader />
-      <NotificationHandler notifications={notificationsList} />{" "}
-      {/* 傳遞正確的 notifications */}
+      <NotificationHandler notifications={notificationsList} />
       <Content style={{ padding: "50px" }}>
         <Typography>
           <Title level={2}>外送員儀表板</Title>
           <Paragraph>
-            歡迎，{deliveryPerson.name}！
+            歡迎，{deliveryPersonState.name}！
             您可以在此處查看待配送訂單、更新配送狀態和管理個人資訊。
           </Paragraph>
         </Typography>
@@ -302,19 +359,19 @@ const DeliveryDashboard = () => {
             <Col xs={24} sm={12} md={8}>
               <Statistic
                 title="今日收入"
-                value={`NT$ ${deliveryPerson.earnings.today}`}
+                value={`NT$ ${deliveryPersonState.earnings.today}`}
               />
             </Col>
             <Col xs={24} sm={12} md={8}>
               <Statistic
                 title="本週收入"
-                value={`NT$ ${deliveryPerson.earnings.week}`}
+                value={`NT$ ${deliveryPersonState.earnings.week}`}
               />
             </Col>
             <Col xs={24} sm={12} md={8}>
               <Statistic
                 title="本月收入"
-                value={`NT$ ${deliveryPerson.earnings.month}`}
+                value={`NT$ ${deliveryPersonState.earnings.month}`}
               />
             </Col>
           </Row>
@@ -432,9 +489,17 @@ const DeliveryDashboard = () => {
           footer={null}
           width={800}
         >
-          {selectedOrder && (
+          {selectedOrder && selectedOrder.pickup && selectedOrder.dropoff && (
             <MapComponent
-              destination={selectedOrder.destination} // 使用訂單中的目的地座標
+              pickup={{
+                lat: selectedOrder.pickup.lat,
+                lng: selectedOrder.pickup.lng,
+              }}
+              dropoff={{
+                lat: selectedOrder.dropoff.lat,
+                lng: selectedOrder.dropoff.lng,
+              }}
+              deliveryPerson={deliveryPersonState.currentLocation}
             />
           )}
         </Modal>
@@ -557,19 +622,19 @@ const DeliveryDashboard = () => {
         <Card title="個人資料" style={{ marginBottom: "20px" }}>
           <Paragraph>
             <strong>姓名：</strong>
-            {deliveryPerson.name}
+            {deliveryPersonState.name}
           </Paragraph>
           <Paragraph>
             <strong>聯絡電話：</strong>
-            {deliveryPerson.phone}
+            {deliveryPersonState.phone}
           </Paragraph>
           <Paragraph>
             <strong>電子郵件：</strong>
-            {deliveryPerson.email}
+            {deliveryPersonState.email}
           </Paragraph>
           <Paragraph>
             <strong>交通工具：</strong>
-            {deliveryPerson.vehicle}
+            {deliveryPersonState.vehicle}
           </Paragraph>
           <Button
             type="primary"
@@ -581,15 +646,20 @@ const DeliveryDashboard = () => {
                     layout="vertical"
                     name="personalInfo"
                     initialValues={{
-                      name: deliveryPerson.name,
-                      phone: deliveryPerson.phone,
-                      email: deliveryPerson.email,
-                      vehicle: deliveryPerson.vehicle,
+                      name: deliveryPersonState.name,
+                      phone: deliveryPersonState.phone,
+                      email: deliveryPersonState.email,
+                      vehicle: deliveryPersonState.vehicle,
                     }}
                     onFinish={(values) => {
                       // 更新個人資訊（此處僅模擬，未持久化）
-                      // 您可以根據需求使用狀態管理或其他方式來更新
-                      console.log("更新個人資訊：", values);
+                      setDeliveryPersonState((prev) => ({
+                        ...prev,
+                        name: values.name,
+                        phone: values.phone,
+                        email: values.email,
+                        vehicle: values.vehicle,
+                      }));
                       message.success("個人資訊已更新！");
                       Modal.destroyAll();
                     }}
@@ -663,7 +733,7 @@ const DeliveryDashboard = () => {
         </Card>
       </Content>
       <AppFooter />
-      <SupportChat /> {/* 添加支援與客服組件 */}
+      <SupportChat />
     </Layout>
   );
 };

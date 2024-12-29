@@ -1,96 +1,120 @@
 // src/components/MapComponent.js
 
 import React, { useState, useEffect } from "react";
-import {
-  GoogleMap,
-  useLoadScript,
-  Marker,
-  DirectionsRenderer,
-} from "@react-google-maps/api";
+import Map, { Marker, Source, Layer } from "react-map-gl";
+import mapboxgl from "mapbox-gl"; // 正確導入 mapbox-gl
+import "mapbox-gl/dist/mapbox-gl.css";
 import "./MapComponent.css";
 
-const containerStyle = {
-  width: "100%",
-  height: "400px",
-};
-
-// 初始中心位置設定為高雄市中心
-const defaultCenter = {
-  lat: 22.6273, // 高雄市中心緯度
-  lng: 120.3014, // 高雄市中心經度
-};
-
-const MapComponent = ({ origin, destination, onRouteChange }) => {
-  const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
+const MapComponent = ({ pickup, dropoff, deliveryPerson }) => {
+  const [viewState, setViewState] = useState({
+    longitude: pickup.lng,
+    latitude: pickup.lat,
+    zoom: 13,
   });
 
-  const [currentPosition, setCurrentPosition] = useState(
-    origin || defaultCenter
-  );
-  const [directions, setDirections] = useState(null);
+  const [route, setRoute] = useState(null);
+
+  const mapboxAccessToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN;
+
+  // 定義路線的樣式
+  const routeLayer = {
+    id: "route",
+    type: "line",
+    source: "route",
+    layout: {
+      "line-join": "round",
+      "line-cap": "round",
+    },
+    paint: {
+      "line-color": "#FF0000",
+      "line-width": 4,
+    },
+  };
 
   useEffect(() => {
-    if (isLoaded && origin && destination) {
-      const directionsService = new window.google.maps.DirectionsService();
+    if (pickup && dropoff) {
+      fetchRoute(pickup, dropoff);
+    }
+  }, [pickup, dropoff]);
 
-      directionsService.route(
-        {
-          origin: origin,
-          destination: destination,
-          travelMode: window.google.maps.TravelMode.DRIVING,
-          drivingOptions: {
-            departureTime: new Date(),
-            trafficModel: "bestguess",
-          },
-        },
-        (result, status) => {
-          if (status === "OK" && result) {
-            setDirections(result);
-            if (onRouteChange) {
-              onRouteChange(result);
-            }
-          } else {
-            console.error(`Error fetching directions: ${status}`);
-          }
+  const fetchRoute = async (pickup, dropoff) => {
+    const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${pickup.lng},${pickup.lat};${dropoff.lng},${dropoff.lat}?geometries=geojson&access_token=${mapboxAccessToken}`;
+
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data.code === "Ok") {
+        const routeData = data.routes[0].geometry;
+        setRoute(routeData);
+
+        // 計算包含取餐地點、送達地點和外送員位置的地圖視野
+        const coordinates = routeData.coordinates;
+
+        const bounds = coordinates.reduce(
+          (bounds, coord) => bounds.extend(coord),
+          new mapboxgl.LngLatBounds(coordinates[0], coordinates[0])
+        );
+
+        // 如果有外送員的位置，將其也包含進去
+        if (deliveryPerson) {
+          bounds.extend([deliveryPerson.lng, deliveryPerson.lat]);
         }
-      );
+
+        const center = bounds.getCenter();
+        setViewState({
+          longitude: center.lng,
+          latitude: center.lat,
+          zoom: 13,
+        });
+      } else {
+        console.error("Directions request failed:", data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching route:", error);
     }
-  }, [isLoaded, origin, destination, onRouteChange]);
-
-  useEffect(() => {
-    if (isLoaded) {
-      // 模擬外送員的位置更新，每5秒更新一次
-      const interval = setInterval(() => {
-        setCurrentPosition((prev) => ({
-          lat: prev.lat + 0.001, // 模擬移動
-          lng: prev.lng + 0.001,
-        }));
-      }, 5000);
-
-      return () => clearInterval(interval);
-    }
-  }, [isLoaded]);
-
-  if (loadError) {
-    return <div>Error loading maps</div>;
-  }
-
-  if (!isLoaded) {
-    return <div>Loading Maps...</div>;
-  }
+  };
 
   return (
-    <GoogleMap
-      mapContainerStyle={containerStyle}
-      className="google-map-container"
-      center={currentPosition}
-      zoom={14}
-    >
-      <Marker position={currentPosition} />
-      {directions && <DirectionsRenderer directions={directions} />}
-    </GoogleMap>
+    <div className="map-container">
+      <Map
+        {...viewState}
+        onMove={(evt) => setViewState(evt.viewState)}
+        style={{ width: "100%", height: "100%" }}
+        mapStyle="mapbox://styles/mapbox/streets-v11"
+        mapboxAccessToken={mapboxAccessToken}
+      >
+        {/* 繪製路線 */}
+        {route && (
+          <Source id="route" type="geojson" data={route}>
+            <Layer {...routeLayer} />
+          </Source>
+        )}
+
+        {/* 取餐地點標記 */}
+        <Marker longitude={pickup.lng} latitude={pickup.lat} color="green">
+          <div title="取餐地點">📍</div>
+        </Marker>
+
+        {/* 送達地點標記 */}
+        <Marker longitude={dropoff.lng} latitude={dropoff.lat} color="red">
+          <div title="送達地點">🏥</div>
+        </Marker>
+
+        {/* 外送員位置標記 */}
+        {deliveryPerson && (
+          <Marker
+            longitude={deliveryPerson.lng}
+            latitude={deliveryPerson.lat}
+            color="blue"
+          >
+            <div title="外送員位置">🚴</div>
+          </Marker>
+        )}
+      </Map>
+    </div>
   );
 };
 
-export default React.memo(MapComponent);
+export default MapComponent;

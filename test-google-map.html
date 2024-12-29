@@ -1,47 +1,192 @@
-// C:\Tasker\QuickEats\quickeats-frontend\test-google-map.html
-
 <!doctype html>
-<html lang="en">
+<html lang="zh-TW">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Google Maps 測試</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mapbox 外送路徑示範</title>
     <style>
       /* 設置地圖容器大小 */
+      body {
+        margin: 0;
+        padding: 0;
+      }
       #map {
-        height: 100vh;
+        position: absolute;
+        top: 0;
+        bottom: 0;
         width: 100%;
       }
+      .marker {
+        background-size: cover;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        cursor: pointer;
+      }
+      .pickup {
+        background-image: url("https://docs.mapbox.com/help/demos/custom-markers-gl-js/mapbox-icon.png");
+      }
+      .dropoff {
+        background-image: url("https://docs.mapbox.com/help/demos/custom-markers-gl-js/mapbox-icon.png");
+      }
+      .delivery-person {
+        background-image: url("https://docs.mapbox.com/help/demos/custom-markers-gl-js/mapbox-icon.png");
+        background-color: blue;
+      }
     </style>
+    <!-- 加載 Mapbox GL JS 的 CSS -->
+    <link
+      href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css"
+      rel="stylesheet"
+    />
   </head>
   <body>
-    <h1 style="">Google Maps 測試</h1>
+    <h1
+      style="position: absolute; z-index: 1; background: white; padding: 10px"
+    >
+      Mapbox 外送路徑示範
+    </h1>
     <div id="map"></div>
 
-    <!-- 加載 Google Maps API -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB9_ZVuKzLTZURhaYjaAaIhOjvwRPYu0SY"></script>
+    <!-- 加載 Mapbox GL JS 的 JavaScript -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
     <script>
-      // 初始化地圖
-      function initMap() {
-        // 設置地圖中心（高雄市中心）
-        const center = { lat: 22.6273, lng: 120.3014 };
+      // 替換為您的 Mapbox Access Token
+      mapboxgl.accessToken =
+        "pk.eyJ1IjoidmluY2V5dWU2NjYiLCJhIjoiY201MXA3aGVnMWc1bDJ4b29nc3VlY2p0ZiJ9.toOUJHXjBVrBF40TePRJ1A";
 
-        // 創建地圖
-        const map = new google.maps.Map(document.getElementById("map"), {
-          zoom: 14,
-          center: center,
-        });
+      // 初始化地圖，中心設置為高雄市鳥松區美山路39號
+      const map = new mapboxgl.Map({
+        container: "map",
+        style: "mapbox://styles/mapbox/streets-v11",
+        center: [120.3111, 22.6669], // 經度, 緯度
+        zoom: 13,
+      });
 
-        // 添加標記
-        new google.maps.Marker({
-          position: center,
-          map: map,
-          title: "高雄市中心",
-        });
+      // 訂單資料
+      const orders = [
+        {
+          orderId: "ORD123456",
+          pickup: { lng: 120.3111, lat: 22.6669 },
+          dropoff: { lng: 120.3323, lat: 22.6424 },
+        },
+        {
+          orderId: "ORD123466",
+          pickup: { lng: 120.2887, lat: 22.6343 },
+          dropoff: { lng: 120.3086, lat: 22.6287 },
+        },
+      ];
+
+      // 外送員的初始位置
+      let deliveryPerson = { lng: 120.3111, lat: 22.6669 };
+
+      // 添加取餐地點和送達地點的標記
+      orders.forEach((order) => {
+        // 取餐地點標記
+        new mapboxgl.Marker({ color: "green" })
+          .setLngLat([order.pickup.lng, order.pickup.lat])
+          .setPopup(
+            new mapboxgl.Popup({ offset: 25 }).setText(
+              `訂單 ${order.orderId} 取餐地點`
+            )
+          )
+          .addTo(map);
+
+        // 送達地點標記
+        new mapboxgl.Marker({ color: "red" })
+          .setLngLat([order.dropoff.lng, order.dropoff.lat])
+          .setPopup(
+            new mapboxgl.Popup({ offset: 25 }).setText(
+              `訂單 ${order.orderId} 送達地點`
+            )
+          )
+          .addTo(map);
+      });
+
+      // 添加外送員標記
+      const deliveryMarker = new mapboxgl.Marker({ color: "blue" })
+        .setLngLat([deliveryPerson.lng, deliveryPerson.lat])
+        .setPopup(new mapboxgl.Popup({ offset: 25 }).setText(`外送員位置`))
+        .addTo(map);
+
+      // 繪製路徑
+      orders.forEach((order) => {
+        const pickup = order.pickup;
+        const dropoff = order.dropoff;
+
+        // 使用 Mapbox Directions API 獲取路徑
+        const directionsURL = `https://api.mapbox.com/directions/v5/mapbox/driving/${pickup.lng},${pickup.lat};${dropoff.lng},${dropoff.lat}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
+
+        fetch(directionsURL)
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.code !== "Ok") {
+              console.error(`Directions request failed: ${data.message}`);
+              return;
+            }
+
+            const route = data.routes[0].geometry;
+
+            // 添加路徑到地圖
+            map.addSource(`route-${order.orderId}`, {
+              type: "geojson",
+              data: {
+                type: "Feature",
+                geometry: route,
+              },
+            });
+
+            map.addLayer({
+              id: `route-${order.orderId}`,
+              type: "line",
+              source: `route-${order.orderId}`,
+              layout: {
+                "line-join": "round",
+                "line-cap": "round",
+              },
+              paint: {
+                "line-color": "#888",
+                "line-width": 6,
+              },
+            });
+          })
+          .catch((error) => {
+            console.error("Error fetching directions:", error);
+          });
+      });
+
+      // 模擬外送員移動（簡單動畫）
+      function moveDeliveryPerson() {
+        // 獲取第一個訂單的送達地點作為目標
+        const target = orders[0].dropoff;
+        const step = 0.0001; // 移動步長
+
+        // 每隔一定時間更新位置
+        const interval = setInterval(() => {
+          if (
+            Math.abs(deliveryPerson.lng - target.lng) < step &&
+            Math.abs(deliveryPerson.lat - target.lat) < step
+          ) {
+            clearInterval(interval);
+            deliveryPerson = { ...target };
+            deliveryMarker.setLngLat([deliveryPerson.lng, deliveryPerson.lat]);
+            return;
+          }
+
+          // 更新外送員位置
+          if (deliveryPerson.lng < target.lng) deliveryPerson.lng += step;
+          if (deliveryPerson.lng > target.lng) deliveryPerson.lng -= step;
+          if (deliveryPerson.lat < target.lat) deliveryPerson.lat += step;
+          if (deliveryPerson.lat > target.lat) deliveryPerson.lat -= step;
+
+          deliveryMarker.setLngLat([deliveryPerson.lng, deliveryPerson.lat]);
+        }, 100); // 每100毫秒更新一次
       }
 
-      // 加載地圖
-      window.onload = initMap;
+      // 啟動外送員移動模擬
+      map.on("load", () => {
+        moveDeliveryPerson();
+      });
     </script>
   </body>
 </html>

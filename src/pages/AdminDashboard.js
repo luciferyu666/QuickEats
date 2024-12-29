@@ -12,7 +12,6 @@ import {
   Divider,
   Modal,
   Button,
-  Table,
 } from "antd";
 import {
   BarChart,
@@ -33,7 +32,7 @@ import Footer from "../components/Footer";
 import OrderManagement from "../components/admin/OrderManagement";
 import UserManagement from "../components/admin/UserManagement";
 import SystemMonitoring from "../components/admin/SystemMonitoring";
-import { transactions, customers } from "../data/mockData"; // 確保路徑正確
+import { transactions, customers, restaurants } from "../data/mockData"; // 確保路徑正確
 import { deliveryData } from "../data/deliveryData"; // 新增導入
 import dayjs from "dayjs";
 
@@ -45,6 +44,18 @@ const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#AA336A"];
 
 // 顏色定義，用於配送餅圖
 const DELIVERY_COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#8dd1e1"];
+
+// 新增的兩個餐廳列表
+const fallbackRestaurants = [
+  {
+    name: "金赫家韓食",
+    url: "https://www.gco2go.com/portal_c1_cnt.php?owner_num=c1_67388&button_num=c1&folder_id=101742",
+  },
+  {
+    name: "享受韓國料理餐酒館",
+    url: "https://www.gco2go.com/portal_c1_cnt.php?owner_num=c1_67388&button_num=c1&folder_id=101201",
+  },
+];
 
 const AdminDashboard = () => {
   // 狀態管理，用於控制客戶、餐廳和配送員模態框的顯示和選中的項目
@@ -82,6 +93,7 @@ const AdminDashboard = () => {
     averageDeliveryTime,
     averageRatingPerPerson,
     deliveryStatusDistribution,
+    top10Restaurants, // 新增前10名餐廳
     transactionsWithTimestamps,
   } = useMemo(() => {
     // 總銷售額
@@ -154,7 +166,7 @@ const AdminDashboard = () => {
     });
     const topActiveCustomers = Object.entries(userOrderCountMap)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 10) // 修改為取前 10 名
+      .slice(0, 10) // 取前 10 名
       .map(([name, count]) => ({ name, count }));
 
     // 訂單狀態分佈
@@ -173,9 +185,10 @@ const AdminDashboard = () => {
     );
     const orderStatusCounts = orderStatusMap;
 
-    // 餐廳銷售額
+    // 餐廳銷售額（排除 '壽司之神'）
     const restaurantSalesMap = {};
     transactions.forEach((txn) => {
+      if (txn.restaurant === "壽司之神") return; // 排除 '壽司之神'
       if (!restaurantSalesMap[txn.restaurant]) {
         restaurantSalesMap[txn.restaurant] = 0;
       }
@@ -193,9 +206,10 @@ const AdminDashboard = () => {
       (a, b) => b.sales - a.sales
     )[0];
 
-    // 餐廳訂單數量
+    // 餐廳訂單數量（排除 '壽司之神'）
     const restaurantOrderCountMap = {};
     transactions.forEach((txn) => {
+      if (txn.restaurant === "壽司之神") return; // 排除 '壽司之神'
       if (!restaurantOrderCountMap[txn.restaurant]) {
         restaurantOrderCountMap[txn.restaurant] = 0;
       }
@@ -209,12 +223,6 @@ const AdminDashboard = () => {
     );
 
     // ====== 新增部分：配送數據處理 ======
-
-    // 建立以 orderId 為鍵的配送數據映射
-    const deliveryMap = deliveryData.reduce((map, delivery) => {
-      map[delivery.orderId] = delivery;
-      return map;
-    }, {});
 
     // 總配送數量
     const totalDeliveries = deliveryData.length;
@@ -237,7 +245,13 @@ const AdminDashboard = () => {
     // 平均配送時間（分鐘）
     const totalDeliveryTime = deliveryData.reduce((sum, delivery) => {
       if (delivery.pickUpTime && delivery.deliveryTime) {
-        return sum + delivery.deliveryTime.diff(delivery.pickUpTime, "minute");
+        return (
+          sum +
+          dayjs(delivery.deliveryTime).diff(
+            dayjs(delivery.pickUpTime),
+            "minute"
+          )
+        );
       }
       return sum;
     }, 0);
@@ -279,6 +293,11 @@ const AdminDashboard = () => {
       })
     );
 
+    // 計算前 10 名餐廳（已排除 '壽司之神'）
+    const top10Restaurants = restaurantSalesData
+      .sort((a, b) => b.sales - a.sales)
+      .slice(0, 10);
+
     // 將所有交易數據添加時間戳格式化
     const transactionsWithTimestamps = transactions.map((txn) => ({
       ...txn,
@@ -304,6 +323,7 @@ const AdminDashboard = () => {
       averageDeliveryTime,
       averageRatingPerPerson,
       deliveryStatusDistribution,
+      top10Restaurants, // 新增前10名餐廳
       transactionsWithTimestamps,
     };
   }, [transactions, deliveryData]); // 添加 deliveryData 作為依賴
@@ -363,7 +383,7 @@ const AdminDashboard = () => {
     setIsDeliveryPersonModalVisible(false);
   };
 
-  // 定義交易數據表格的列
+  // 定義交易數據表格的列（現已不再使用，但保留以防需要）
   const transactionsColumns = [
     {
       title: "訂單 ID",
@@ -397,6 +417,65 @@ const AdminDashboard = () => {
       key: "formattedTimestamp",
     },
   ];
+
+  // 查找餐廳的 URL
+  const getRestaurantURL = (restaurantName) => {
+    const restaurant = restaurants.find((rest) => rest.name === restaurantName);
+    return restaurant ? restaurant.url : "#";
+  };
+
+  // 根據 orderId 查找餐廳名稱
+  const getRestaurantNameByOrderId = (orderId) => {
+    const txn = transactions.find((txn) => txn.orderId === orderId);
+    return txn ? txn.restaurant : null;
+  };
+
+  // 根據 orderId 查找餐廳詳細資訊，若找不到則隨機選擇 '金赫家韓食' 或 '享受韓國料理餐酒館'
+  const getRestaurantDetailsByOrderId = (orderId) => {
+    const txn = transactions.find((txn) => txn.orderId === orderId);
+    if (txn) {
+      return {
+        name: txn.restaurant,
+        url: getRestaurantURL(txn.restaurant),
+      };
+    } else {
+      // 隨機選擇 '金赫家韓食' 或 '享受韓國料理餐酒館'
+      const randomIndex = Math.floor(
+        Math.random() * fallbackRestaurants.length
+      );
+      return fallbackRestaurants[randomIndex];
+    }
+  };
+
+  // 獲取指定客戶的所有訂單
+  const getCustomerOrders = (customerName) => {
+    return transactions
+      .filter((txn) => txn.userName === customerName)
+      .map((txn) => ({
+        orderId: txn.orderId,
+        restaurant: txn.restaurant,
+        restaurantURL: getRestaurantURL(txn.restaurant),
+        totalAmount: txn.totalAmount,
+        status: txn.status,
+        timestamp: dayjs(txn.timestamp).format("YYYY-MM-DD HH:mm:ss"),
+      }));
+  };
+
+  // 獲取指定餐廳的所有訂單（排除 '壽司之神'）
+  const getRestaurantOrders = (restaurantName) => {
+    return transactions
+      .filter(
+        (txn) =>
+          txn.restaurant === restaurantName && txn.restaurant !== "壽司之神"
+      )
+      .map((txn) => ({
+        orderId: txn.orderId,
+        userName: txn.userName,
+        totalAmount: txn.totalAmount,
+        status: txn.status,
+        timestamp: dayjs(txn.timestamp).format("YYYY-MM-DD HH:mm:ss"),
+      }));
+  };
 
   return (
     <Layout>
@@ -482,24 +561,59 @@ const AdminDashboard = () => {
           </Row>
           <Divider />
           <Title level={4}>活躍客戶排行榜（前 10 名）</Title>
-          <List
-            dataSource={topActiveCustomers}
-            renderItem={(user, index) => (
-              <List.Item key={user.name}>
-                <List.Item.Meta
-                  title={
-                    <Button
-                      type="link"
-                      onClick={() => handleCustomerClick(user.name)}
-                    >
-                      {index + 1}. {user.name}
-                    </Button>
-                  }
-                  description={`訂單數量: ${user.count}`}
-                />
-              </List.Item>
-            )}
-          />
+          <Row gutter={[16, 16]}>
+            {topActiveCustomers.map((customer, index) => {
+              const customerOrders = getCustomerOrders(customer.name);
+              return (
+                <Col xs={24} sm={12} md={8} lg={6} key={customer.name}>
+                  <Card
+                    title={`${index + 1}. ${customer.name}`}
+                    bordered={false}
+                    hoverable
+                    style={{ cursor: "pointer" }}
+                    onClick={() => handleCustomerClick(customer.name)}
+                  >
+                    <p>訂單數量: {customer.count}</p>
+                    <List
+                      size="small"
+                      bordered
+                      dataSource={customerOrders}
+                      renderItem={(order) => (
+                        <List.Item>
+                          <ul style={{ paddingLeft: "20px", margin: 0 }}>
+                            <li>
+                              <strong>訂單 ID：</strong> {order.orderId}
+                            </li>
+                            <li>
+                              <strong>餐廳：</strong>{" "}
+                              <a
+                                href={order.restaurantURL}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                {order.restaurant}
+                              </a>
+                            </li>
+                            <li>
+                              <strong>總金額：</strong> NT$
+                              {order.totalAmount.toFixed(2)}
+                            </li>
+                            <li>
+                              <strong>狀態：</strong> {order.status}
+                            </li>
+                            <li>
+                              <strong>時間：</strong> {order.timestamp}
+                            </li>
+                          </ul>
+                        </List.Item>
+                      )}
+                      style={{ maxHeight: "200px", overflowY: "auto" }}
+                    />
+                  </Card>
+                </Col>
+              );
+            })}
+          </Row>
         </Card>
 
         {/* 訂單狀態分佈 */}
@@ -582,12 +696,7 @@ const AdminDashboard = () => {
                     <strong>銷售額：</strong> NT$
                     {mostPopularRestaurant.sales.toFixed(2)}
                   </p>
-                  <p>
-                    <strong>日期：</strong>{" "}
-                    {dayjs(mostPopularRestaurant.timestamp).format(
-                      "YYYY-MM-DD"
-                    )}
-                  </p>
+                  {/* 如果需要顯示日期，可以根據交易數據添加 */}
                 </Card>
               ) : (
                 <p>暫無數據</p>
@@ -616,6 +725,71 @@ const AdminDashboard = () => {
             </Col>
           </Row>
         </Card>
+
+        {/* ====== 新增部分：餐廳表現排行榜前10名 ====== */}
+        <Card
+          title="餐廳表現排行榜（前 10 名）"
+          style={{ marginBottom: "20px" }}
+        >
+          <Row gutter={[16, 16]}>
+            {top10Restaurants.map((restaurant, index) => {
+              const restaurantOrders = getRestaurantOrders(restaurant.name);
+              const restaurantURL = getRestaurantURL(restaurant.name);
+              return (
+                <Col xs={24} sm={12} md={8} lg={6} key={restaurant.name}>
+                  <Card
+                    title={`${index + 1}. ${restaurant.name}`}
+                    bordered={false}
+                    hoverable
+                    style={{ cursor: "pointer" }}
+                    onClick={() => handleRestaurantClick(restaurant.name)}
+                  >
+                    <p>銷售額: NT${restaurant.sales.toFixed(2)}</p>
+                    <List
+                      size="small"
+                      bordered
+                      dataSource={restaurantOrders}
+                      renderItem={(order) => (
+                        <List.Item>
+                          <ul style={{ paddingLeft: "20px", margin: 0 }}>
+                            <li>
+                              <strong>訂單 ID：</strong> {order.orderId}
+                            </li>
+                            <li>
+                              <strong>用戶名稱：</strong> {order.userName}
+                            </li>
+                            <li>
+                              <strong>總金額：</strong> NT$
+                              {order.totalAmount.toFixed(2)}
+                            </li>
+                            <li>
+                              <strong>狀態：</strong> {order.status}
+                            </li>
+                            <li>
+                              <strong>時間：</strong> {order.timestamp}
+                            </li>
+                            <li>
+                              <strong>餐廳：</strong>{" "}
+                              <a
+                                href={restaurantURL}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                {restaurant.name}
+                              </a>
+                            </li>
+                          </ul>
+                        </List.Item>
+                      )}
+                      style={{ maxHeight: "200px", overflowY: "auto" }}
+                    />
+                  </Card>
+                </Col>
+              );
+            })}
+          </Row>
+        </Card>
+        {/* ====== 餐廳表現排行榜前10名結束 ====== */}
 
         {/* ====== 新增部分：配送數據展示 ====== */}
         <Card title="配送數據" style={{ marginBottom: "20px" }}>
@@ -732,19 +906,135 @@ const AdminDashboard = () => {
               </ResponsiveContainer>
             </Col>
           </Row>
+          <Divider />
+          {/* 新增：配送記錄卡片列表 */}
+          <Title level={4}>所有配送記錄</Title>
+          <List
+            grid={{ gutter: 16, column: 1 }}
+            dataSource={deliveryData}
+            renderItem={(delivery) => {
+              // 根據 orderId 獲取餐廳名稱和 URL
+              const { name: restaurantName, url: restaurantURL } =
+                getRestaurantDetailsByOrderId(delivery.orderId);
+
+              return (
+                <List.Item key={delivery.deliveryId}>
+                  <Card
+                    hoverable
+                    title={`配送 ID: ${delivery.deliveryId}`}
+                    extra={
+                      <a
+                        href={restaurantURL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {restaurantName}
+                      </a>
+                    }
+                  >
+                    <p>
+                      <strong>訂單 ID：</strong> {delivery.orderId}
+                    </p>
+                    <p>
+                      <strong>餐廳：</strong>{" "}
+                      <a
+                        href={restaurantURL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {restaurantName}
+                      </a>
+                    </p>
+                    <p>
+                      <strong>配送員：</strong> {delivery.deliveryPerson}
+                    </p>
+                    <p>
+                      <strong>取貨時間：</strong>{" "}
+                      {dayjs(delivery.pickUpTime).format("YYYY-MM-DD HH:mm:ss")}
+                    </p>
+                    <p>
+                      <strong>配送時間：</strong>{" "}
+                      {dayjs(delivery.deliveryTime).format(
+                        "YYYY-MM-DD HH:mm:ss"
+                      )}
+                    </p>
+                    <p>
+                      <strong>配送狀態：</strong> {delivery.status}
+                    </p>
+                    <p>
+                      <strong>評分：</strong>{" "}
+                      {delivery.rating ? delivery.rating : "無評分"}
+                    </p>
+                    <p>
+                      <strong>配送路線：</strong>
+                    </p>
+                    <List
+                      dataSource={delivery.route}
+                      renderItem={(routePoint, index) => (
+                        <List.Item key={index}>
+                          {index === 0 ? "餐廳位置：" : "用戶位置："} Lat:{" "}
+                          {routePoint.lat}, Lng: {routePoint.lng}
+                        </List.Item>
+                      )}
+                      size="small"
+                      bordered
+                    />
+                  </Card>
+                </List.Item>
+              );
+            }}
+          />
         </Card>
         {/* ====== 配送數據展示結束 ====== */}
 
-        {/* 交易數據表格 */}
+        {/* ====== 新增部分：所有交易記錄卡片式展示 ====== */}
         <Card title="所有交易記錄" style={{ marginBottom: "20px" }}>
-          <Table
+          <List
+            grid={{ gutter: 16, column: 1 }}
             dataSource={transactionsWithTimestamps}
-            columns={transactionsColumns}
-            rowKey="orderId"
-            pagination={{ pageSize: 10 }}
-            scroll={{ x: "100%" }}
+            renderItem={(txn) => (
+              <List.Item key={txn.orderId}>
+                <Card
+                  hoverable
+                  title={`訂單 ID: ${txn.orderId}`}
+                  extra={
+                    <a
+                      href={getRestaurantURL(txn.restaurant)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {txn.restaurant}
+                    </a>
+                  }
+                >
+                  <p>
+                    <strong>用戶名稱：</strong> {txn.userName}
+                  </p>
+                  <p>
+                    <strong>餐廳：</strong>{" "}
+                    <a
+                      href={getRestaurantURL(txn.restaurant)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {txn.restaurant}
+                    </a>
+                  </p>
+                  <p>
+                    <strong>總金額：</strong> NT${txn.totalAmount.toFixed(2)}
+                  </p>
+                  <p>
+                    <strong>狀態：</strong> {txn.status}
+                  </p>
+                  <p>
+                    <strong>時間：</strong> {txn.formattedTimestamp}
+                  </p>
+                </Card>
+              </List.Item>
+            )}
           />
         </Card>
+        {/* ====== 所有交易記錄卡片式展示結束 ====== */}
 
         {/* 其他管理員功能 */}
         <Row gutter={[16, 16]}>
@@ -883,53 +1173,67 @@ const AdminDashboard = () => {
               itemLayout="vertical"
               size="large"
               dataSource={selectedDeliveryPersonDeliveries}
-              renderItem={(delivery) => (
-                <List.Item key={delivery.deliveryId}>
-                  <List.Item.Meta
-                    title={`訂單ID: ${delivery.orderId}`}
-                    description={
-                      <div>
-                        <p>
-                          <strong>配送員：</strong> {delivery.deliveryPerson}
-                        </p>
-                        <p>
-                          <strong>取貨時間：</strong>{" "}
-                          {dayjs(delivery.pickUpTime).format(
-                            "YYYY-MM-DD HH:mm:ss"
-                          )}
-                        </p>
-                        <p>
-                          <strong>配送時間：</strong>{" "}
-                          {dayjs(delivery.deliveryTime).format(
-                            "YYYY-MM-DD HH:mm:ss"
-                          )}
-                        </p>
-                        <p>
-                          <strong>配送狀態：</strong> {delivery.status}
-                        </p>
-                        <p>
-                          <strong>評分：</strong>{" "}
-                          {delivery.rating ? delivery.rating : "無評分"}
-                        </p>
-                        <p>
-                          <strong>配送路線：</strong>
-                        </p>
-                        <List
-                          dataSource={delivery.route}
-                          renderItem={(routePoint, index) => (
-                            <List.Item key={index}>
-                              {index === 0 ? "餐廳位置：" : "用戶位置："} Lat:{" "}
-                              {routePoint.lat}, Lng: {routePoint.lng}
-                            </List.Item>
-                          )}
-                          size="small"
-                          bordered
-                        />
-                      </div>
-                    }
-                  />
-                </List.Item>
-              )}
+              renderItem={(delivery) => {
+                const { name: restaurantName, url: restaurantURL } =
+                  getRestaurantDetailsByOrderId(delivery.orderId);
+                return (
+                  <List.Item key={delivery.deliveryId}>
+                    <List.Item.Meta
+                      title={`訂單ID: ${delivery.orderId}`}
+                      description={
+                        <div>
+                          <p>
+                            <strong>配送員：</strong> {delivery.deliveryPerson}
+                          </p>
+                          <p>
+                            <strong>取貨時間：</strong>{" "}
+                            {dayjs(delivery.pickUpTime).format(
+                              "YYYY-MM-DD HH:mm:ss"
+                            )}
+                          </p>
+                          <p>
+                            <strong>配送時間：</strong>{" "}
+                            {dayjs(delivery.deliveryTime).format(
+                              "YYYY-MM-DD HH:mm:ss"
+                            )}
+                          </p>
+                          <p>
+                            <strong>配送狀態：</strong> {delivery.status}
+                          </p>
+                          <p>
+                            <strong>評分：</strong>{" "}
+                            {delivery.rating ? delivery.rating : "無評分"}
+                          </p>
+                          <p>
+                            <strong>餐廳：</strong>{" "}
+                            <a
+                              href={restaurantURL}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {restaurantName}
+                            </a>
+                          </p>
+                          <p>
+                            <strong>配送路線：</strong>
+                          </p>
+                          <List
+                            dataSource={delivery.route}
+                            renderItem={(routePoint, index) => (
+                              <List.Item key={index}>
+                                {index === 0 ? "餐廳位置：" : "用戶位置："} Lat:{" "}
+                                {routePoint.lat}, Lng: {routePoint.lng}
+                              </List.Item>
+                            )}
+                            size="small"
+                            bordered
+                          />
+                        </div>
+                      }
+                    />
+                  </List.Item>
+                );
+              }}
               style={{ maxHeight: "600px", overflowY: "auto" }}
             />
           ) : (
