@@ -1,0 +1,42 @@
+/* src/layout/AdminLayout.css */
+
+.admin-layout {
+  height: 100vh;
+}
+
+.admin-body {
+  display: flex;
+  flex: 1;
+}
+
+.admin-content {
+  flex: 1;
+  padding: 24px;
+  background: #f0f2f5;
+  overflow-y: auto;
+}
+
+/* 增加菜單項目之間的間隔 */
+.admin-menu .ant-menu-item {
+  padding-top: 16px !important;
+  padding-bottom: 16px !important;
+  margin-bottom: 8px; /* 進一步增加間隔 */
+}
+
+/* 調整菜單的字體大小和顏色 */
+.admin-menu .ant-menu-item a {
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+/* 在選中項目時增加背景顏色 */
+.admin-menu .ant-menu-item-selected {
+  background-color: #e6f7ff !important;
+}
+
+/* 自訂 Logo 區塊的樣式 */
+.logo {
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+}

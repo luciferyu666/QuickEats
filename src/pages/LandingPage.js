@@ -15,7 +15,11 @@ const LandingPage = () => {
   const navigate = useNavigate();
 
   const handleRoleClick = (roleId) => {
-    navigate(`/dashboard/${roleId}`); // 更新導航路徑
+    if (roleId === "admin") {
+      navigate("/admin"); // 導航到 /admin
+    } else {
+      navigate(`/dashboard/${roleId}`); // 其他角色導航到 /dashboard/user, /dashboard/restaurant, /dashboard/delivery
+    }
   };
 
   return (
