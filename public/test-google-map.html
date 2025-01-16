@@ -14,19 +14,22 @@
       #map {
         position: absolute;
         top: 0;
-        bottom: 300px; /* 讓出下方空間顯示資訊 */
+        bottom: 400px; /* 調整下方空間顯示資訊 */
         width: 100%;
-        height: 60vh; /* 50% 的視窗高度 */
+        height: 60vh; /* 60% 的視窗高度 */
       }
       #info {
         position: absolute;
         bottom: 0;
         width: 100%;
-        height: 300px;
+        height: 400px;
         background: rgba(255, 255, 255, 0.95);
         padding: 20px;
         box-sizing: border-box;
         overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
       }
       .marker {
         background-size: cover;
@@ -105,7 +108,7 @@
     />
   </head>
   <body>
-    <h1 class="title">外送路徑測試（時間窗限制 + 最短路徑）</h2>
+    <h1 class="title">外送路徑測試（時間窗限制 + 最短路徑）</h1>
     <div id="map"></div>
     <div id="info">
       <div class="delivery-info" id="info-A">
@@ -117,6 +120,9 @@
           <button class="ant-btn ant-btn-primary" id="button-A">
             配送員 A 配送
           </button>
+          <button class="ant-btn" id="toggle-service-A">
+            顯示/隱藏 A 服務範圍
+          </button>
         </div>
       </div>
       <div class="delivery-info" id="info-B">
@@ -127,6 +133,9 @@
         <div class="buttons">
           <button class="ant-btn ant-btn-primary" id="button-B">
             配送員 B 配送
+          </button>
+          <button class="ant-btn" id="toggle-service-B">
+            顯示/隱藏 B 服務範圍
           </button>
         </div>
       </div>
@@ -174,65 +183,78 @@
 
       // ======== 訂單數據 ========
       const allOrders = [
+        // 配送員 A 的初始訂單
         {
-          id: "A1",
-          pickup: { lng: 120.3313, lat: 22.615 }, // 高雄市苓雅區光華一路148之76號2樓之1
-          dropoff: { lng: 120.3323, lat: 22.6424 }, // 高雄市鳳山區經武路42之1號
+          id: "A",
+          pickup: { lng: 120.3313, lat: 22.615 }, // 苓雅區光華一路148之76號2樓之1
+          dropoff: { lng: 120.3323, lat: 22.6424 }, // 鳳山區經武路42之1號
           pickupWindow: { start: "13:30", end: "14:00" },
           dropoffWindow: { start: "14:00", end: "14:15" },
           isUrgent: true,
-          requiresBoxRecycle: true,
-        },
-        {
-          id: "B1",
-          pickup: { lng: 120.2887, lat: 22.6343 }, // 高雄市新興區復橫一路39號
-          dropoff: { lng: 120.3086, lat: 22.6287 }, // 高雄市鳳山區鳳明街62號
-          pickupWindow: { start: "13:30", end: "14:30" },
-          dropoffWindow: { start: "14:30", end: "15:00" },
-          isUrgent: false,
           requiresBoxRecycle: false,
         },
         {
-          id: "C1",
-          pickup: { lng: 120.2887, lat: 22.6343 }, // 高雄市新興區開封路56號
-          dropoff: { lng: 120.3086, lat: 22.6287 }, // 高雄市鳳山區曹公路6號
+          id: "B",
+          pickup: { lng: 120.2887, lat: 22.6343 }, // 新興區復橫一路39號
+          dropoff: { lng: 120.3086, lat: 22.6287 }, // 鳳山區鳳明街62號
+          pickupWindow: { start: "13:30", end: "14:30" },
+          dropoffWindow: { start: "14:30", end: "15:00" },
+          isUrgent: false,
+          requiresBoxRecycle: true,
+        },
+        {
+          id: "C",
+          pickup: { lng: 120.2887, lat: 22.6343 }, // 新興區開封路56號
+          dropoff: { lng: 120.3086, lat: 22.6287 }, // 鳳山區曹公路6號
           pickupWindow: { start: "14:00", end: "14:30" },
           dropoffWindow: { start: "14:45", end: "15:15" },
           isUrgent: false,
           requiresBoxRecycle: true,
         },
+        // 配送員 A 的臨時訂單 D
         {
-          id: "A2",
-          pickup: { lng: 120.3313, lat: 22.615 }, // 高雄市苓雅區苓雅二路81號
-          dropoff: { lng: 120.3323, lat: 22.6424 }, // 高雄市新興區中正三路34號
-          pickupWindow: { start: "13:15", end: "13:45" },
-          dropoffWindow: { start: "14:00", end: "14:15" },
+          id: "D",
+          pickup: { lng: 120.311, lat: 22.62 }, // 苓雅區五福一路100號
+          dropoff: { lng: 120.307, lat: 22.635 }, // 鳳山區忠誠街88號
+          pickupWindow: { start: "14:10", end: "14:30" },
+          dropoffWindow: { start: "14:30", end: "14:50" },
+          isUrgent: true,
+          requiresBoxRecycle: false,
+        },
+        // 配送員 B 的初始訂單
+        {
+          id: "A",
+          pickup: { lng: 120.327, lat: 22.63 }, // 前金區青年二路98號
+          dropoff: { lng: 120.3086, lat: 22.6287 }, // 中華三路33號
+          pickupWindow: { start: "13:30", end: "14:15" },
+          dropoffWindow: { start: "14:15", end: "14:30" },
           isUrgent: true,
           requiresBoxRecycle: false,
         },
         {
-          id: "B2",
-          pickup: { lng: 120.2887, lat: 22.6343 }, // 高雄市新興區開封路56號
-          dropoff: { lng: 120.3086, lat: 22.6287 }, // 高雄市鳳山區曹公路55之1號
+          id: "B",
+          pickup: { lng: 120.2887, lat: 22.6343 }, // 新興區開封路56號
+          dropoff: { lng: 120.3086, lat: 22.6287 }, // 中華三路33號
           pickupWindow: { start: "13:45", end: "14:15" },
           dropoffWindow: { start: "14:30", end: "15:00" },
           isUrgent: false,
           requiresBoxRecycle: true,
         },
         {
-          id: "C2",
-          pickup: { lng: 120.3313, lat: 22.615 }, // 高雄市苓雅區光華一路148之76號2樓之1
-          dropoff: { lng: 120.3086, lat: 22.6287 }, // 高雄市新興區中正三路3號
-          pickupWindow: { start: "13:30", end: "14:00" },
-          dropoffWindow: { start: "14:15", end: "14:30" },
-          isUrgent: true,
+          id: "C",
+          pickup: { lng: 120.2887, lat: 22.6343 }, // 新興區林森一路50號
+          dropoff: { lng: 120.3086, lat: 22.6287 }, // 前金區中華三路33號
+          pickupWindow: { start: "14:40", end: "15:00" },
+          dropoffWindow: { start: "15:00", end: "15:20" },
+          isUrgent: false,
           requiresBoxRecycle: false,
         },
-        // 可以根據需要添加更多訂單
+        // 配送員 B 的臨時訂單 E
+        // 假設 E 已包含在上面的訂單中
       ];
 
       // ======== 配送員初始位置 ========
-      const deliveryA = { lng: 120.327, lat: 22.631 }; // 高雄市鳥松區美山路39號
+      const deliveryA = { lng: 120.327, lat: 22.63 }; // 高雄市鳥松區美山路39號
       const deliveryB = { lng: 120.307, lat: 22.627 }; // 高雄市前金區青年二路98號
 
       // ======== 路徑順序設計 ========
@@ -380,7 +402,12 @@
         const assignedA = [];
         const assignedB = [];
 
-        allOrders.forEach((order) => {
+        // 先按照急單優先排序
+        const sortedOrders = [...allOrders].sort(
+          (a, b) => b.isUrgent - a.isUrgent
+        );
+
+        sortedOrders.forEach((order) => {
           const pickupPoint = turf.point([order.pickup.lng, order.pickup.lat]);
 
           const serviceAreaA = turf.circle(
@@ -404,30 +431,17 @@
             assignedB.push(order);
           } else if (inA && inB) {
             // 計算距離，分配給最近的配送員
-            const distanceA = haversineDistance(order.pickup, {
-              lat: deliveryA.lat,
-              lng: deliveryA.lng,
-            });
-            const distanceB = haversineDistance(order.pickup, {
-              lat: deliveryB.lat,
-              lng: deliveryB.lng,
-            });
+            const distanceA = haversineDistance(order.pickup, deliveryA);
+            const distanceB = haversineDistance(order.pickup, deliveryB);
             if (distanceA <= distanceB) {
               assignedA.push(order);
             } else {
               assignedB.push(order);
             }
           } else {
-            // 不在任何服務範圍內，這裡可以選擇忽略或分配給最近的配送員
-            // 這裡我們選擇分配給最近的配送員
-            const distanceA = haversineDistance(order.pickup, {
-              lat: deliveryA.lat,
-              lng: deliveryA.lng,
-            });
-            const distanceB = haversineDistance(order.pickup, {
-              lat: deliveryB.lat,
-              lng: deliveryB.lng,
-            });
+            // 不在任何服務範圍內，分配給最近的配送員
+            const distanceA = haversineDistance(order.pickup, deliveryA);
+            const distanceB = haversineDistance(order.pickup, deliveryB);
             if (distanceA <= distanceB) {
               assignedA.push(order);
             } else {
@@ -439,85 +453,167 @@
         return { assignedA, assignedB };
       }
 
-      const { assignedA, assignedB } = assignOrders();
+      let assignedA = [];
+      let assignedB = [];
 
       // ======== 準備配送員 A 的路徑 ========
-      routeSequenceA = [
-        {
-          type: "start",
-          name: "起點(高雄市鳥松區美山路39號)",
-          coords: { ...deliveryA },
-          earliest: "13:00",
-          latest: "13:00",
-        },
-        ...assignedA.map((order) => ({
-          type: order.isUrgent ? "pickup-urgent" : "pickup",
-          name: `${order.id}-取餐`,
-          coords: order.pickup,
-          earliest: order.pickupWindow.start,
-          latest: order.pickupWindow.end,
-          orderId: order.id,
-          requiresBoxRecycle: order.requiresBoxRecycle,
-        })),
-        ...assignedA.map((order) => ({
-          type: order.isUrgent ? "dropoff-urgent" : "dropoff",
-          name: `${order.id}-送餐`,
-          coords: order.dropoff,
-          earliest: order.dropoffWindow.start,
-          latest: order.dropoffWindow.end,
-          orderId: order.id,
-          requiresBoxRecycle: order.requiresBoxRecycle,
-        })),
-        {
-          type: "end",
-          name: "返回起點(高雄市鳥松區美山路39號)",
-          coords: { ...deliveryA },
-          earliest: "00:00",
-          latest: "23:59",
-        },
-      ];
+      function prepareRouteSequenceA() {
+        routeSequenceA = [
+          {
+            type: "start",
+            name: "起點(高雄市鳥松區美山路39號)",
+            coords: { ...deliveryA },
+            earliest: "13:00",
+            latest: "13:00",
+          },
+          ...assignedA
+            .filter((order) => order.id !== "D") // 排除臨時訂單 D
+            .map((order) => ({
+              type: order.isUrgent ? "pickup-urgent" : "pickup",
+              name: `${order.id}-取餐`,
+              coords: order.pickup,
+              earliest: order.pickupWindow.start,
+              latest: order.pickupWindow.end,
+              orderId: order.id,
+              requiresBoxRecycle: order.requiresBoxRecycle,
+            })),
+          ...assignedA
+            .filter((order) => order.id !== "D") // 排除臨時訂單 D
+            .map((order) => ({
+              type: order.isUrgent ? "dropoff-urgent" : "dropoff",
+              name: `${order.id}-送餐`,
+              coords: order.dropoff,
+              earliest: order.dropoffWindow.start,
+              latest: order.dropoffWindow.end,
+              orderId: order.id,
+              requiresBoxRecycle: order.requiresBoxRecycle,
+            })),
+          {
+            type: "end",
+            name: "返回起點(高雄市鳥松區美山路39號)",
+            coords: { ...deliveryA },
+            earliest: "00:00",
+            latest: "23:59",
+          },
+        ];
+
+        // 插入臨時訂單 D
+        const tempOrderDIndex = routeSequenceA.findIndex(
+          (step) => step.type === "pickup-urgent" && step.orderId === "A"
+        );
+        if (tempOrderDIndex !== -1) {
+          routeSequenceA.splice(tempOrderDIndex + 1, 0, {
+            type: "pickup-urgent",
+            name: `D-取餐`,
+            coords: allOrders.find((o) => o.id === "D").pickup,
+            earliest: "14:10",
+            latest: "14:30",
+            orderId: "D",
+            requiresBoxRecycle: false,
+          });
+          routeSequenceA.splice(tempOrderDIndex + 2, 0, {
+            type: "dropoff-urgent",
+            name: `D-送餐`,
+            coords: allOrders.find((o) => o.id === "D").dropoff,
+            earliest: "14:30",
+            latest: "14:50",
+            orderId: "D",
+            requiresBoxRecycle: false,
+          });
+        }
+      }
 
       // ======== 準備配送員 B 的路徑 ========
-      routeSequenceB = [
-        {
-          type: "start",
-          name: "起點(高雄市前金區青年二路98號)",
-          coords: { ...deliveryB },
-          earliest: "13:00",
-          latest: "13:00",
-        },
-        ...assignedB.map((order) => ({
-          type: order.isUrgent ? "pickup-urgent" : "pickup",
-          name: `${order.id}-取餐`,
-          coords: order.pickup,
-          earliest: order.pickupWindow.start,
-          latest: order.pickupWindow.end,
-          orderId: order.id,
-          requiresBoxRecycle: order.requiresBoxRecycle,
-        })),
-        ...assignedB.map((order) => ({
-          type: order.isUrgent ? "dropoff-urgent" : "dropoff",
-          name: `${order.id}-送餐`,
-          coords: order.dropoff,
-          earliest: order.dropoffWindow.start,
-          latest: order.dropoffWindow.end,
-          orderId: order.id,
-          requiresBoxRecycle: order.requiresBoxRecycle,
-        })),
-        {
-          type: "end",
-          name: "返回起點(高雄市前金區青年二路98號)",
-          coords: { ...deliveryB },
-          earliest: "00:00",
-          latest: "23:59",
-        },
-      ];
+      function prepareRouteSequenceB() {
+        routeSequenceB = [
+          {
+            type: "start",
+            name: "起點(高雄市前金區青年二路98號)",
+            coords: { ...deliveryB },
+            earliest: "13:00",
+            latest: "13:00",
+          },
+          ...assignedB
+            .filter((order) => order.id !== "E") // 排除臨時訂單 E
+            .map((order) => ({
+              type: order.isUrgent ? "pickup-urgent" : "pickup",
+              name: `${order.id}-取餐`,
+              coords: order.pickup,
+              earliest: order.pickupWindow.start,
+              latest: order.pickupWindow.end,
+              orderId: order.id,
+              requiresBoxRecycle: order.requiresBoxRecycle,
+            })),
+          ...assignedB
+            .filter((order) => order.id !== "E") // 排除臨時訂單 E
+            .map((order) => ({
+              type: order.isUrgent ? "dropoff-urgent" : "dropoff",
+              name: `${order.id}-送餐`,
+              coords: order.dropoff,
+              earliest: order.dropoffWindow.start,
+              latest: order.dropoffWindow.end,
+              orderId: order.id,
+              requiresBoxRecycle: order.requiresBoxRecycle,
+            })),
+          {
+            type: "end",
+            name: "返回起點(高雄市前金區青年二路98號)",
+            coords: { ...deliveryB },
+            earliest: "00:00",
+            latest: "23:59",
+          },
+        ];
 
-      // ======== 計算路徑結果 ========
-      const { routeResult: routeResultA, totalDistance: totalDistanceA } =
-        calculateRoute(routeSequenceA);
-      const { routeResult: routeResultB, totalDistance: totalDistanceB } =
-        calculateRoute(routeSequenceB);
+        // 插入臨時訂單 E
+        const tempOrderEIndex = routeSequenceB.findIndex(
+          (step) => step.type === "pickup-urgent" && step.orderId === "A"
+        );
+        if (tempOrderEIndex !== -1) {
+          routeSequenceB.splice(tempOrderEIndex + 1, 0, {
+            type: "pickup",
+            name: `E-取餐`,
+            coords: allOrders.find((o) => o.id === "E").pickup,
+            earliest: "14:40",
+            latest: "15:00",
+            orderId: "E",
+            requiresBoxRecycle: false,
+          });
+          routeSequenceB.splice(tempOrderEIndex + 2, 0, {
+            type: "dropoff",
+            name: `E-送餐`,
+            coords: allOrders.find((o) => o.id === "E").dropoff,
+            earliest: "15:00",
+            latest: "15:20",
+            orderId: "E",
+            requiresBoxRecycle: false,
+          });
+        }
+      }
+
+      // ======== 生成服務範圍圓形 ========
+      function addServiceArea(center, radiusKm, deliveryPersonId) {
+        const options = { steps: 64, units: "kilometers" };
+        const circle = turf.circle([center.lng, center.lat], radiusKm, options);
+
+        map.addSource(`${deliveryPersonId}-service-area`, {
+          type: "geojson",
+          data: circle,
+        });
+
+        map.addLayer({
+          id: `${deliveryPersonId}-service-area`,
+          type: "fill",
+          source: `${deliveryPersonId}-service-area`,
+          layout: {},
+          paint: {
+            "fill-color": deliveryPersonId === "A" ? "#FF0000" : "#0000FF",
+            "fill-opacity": 0.1,
+          },
+          layout: {
+            visibility: "none", // 初始設為不可見
+          },
+        });
+      }
 
       // ======== 產生對應的 routeSegments 用於動態動畫 ========
       // 我們會一段一段去呼叫 Mapbox Directions API 拿到座標
@@ -577,31 +673,6 @@
         }
       }
 
-      // ======== 生成服務範圍圓形 ========
-      function addServiceArea(center, radiusKm, deliveryPersonId) {
-        const options = { steps: 64, units: "kilometers" };
-        const circle = turf.circle([center.lng, center.lat], radiusKm, options);
-
-        map.addSource(`${deliveryPersonId}-service-area`, {
-          type: "geojson",
-          data: circle,
-        });
-
-        map.addLayer({
-          id: `${deliveryPersonId}-service-area`,
-          type: "fill",
-          source: `${deliveryPersonId}-service-area`,
-          layout: {},
-          paint: {
-            "fill-color": deliveryPersonId === "A" ? "#FF0000" : "#0000FF",
-            "fill-opacity": 0.1,
-          },
-          layout: {
-            visibility: "none", // 初始設為不可見
-          },
-        });
-      }
-
       // ======== 在下方顯示計算結果 ========
       function displayRouteDetails(
         routeResult,
@@ -649,27 +720,6 @@
         addMarkers(routeSequenceA);
         addMarkers(routeSequenceB);
       }
-
-      // ======== 初始化地圖並繪製路線與服務範圍 ========
-      map.on("load", async () => {
-        // 繪製配送員 A 的路線
-        await addRouteLayer(routeSequenceA, routeSegmentsA, "A");
-        // 繪製配送員 B 的路線
-        await addRouteLayer(routeSequenceB, routeSegmentsB, "B");
-        // 添加服務範圍圓形
-        addServiceArea(deliveryA, serviceRadiusKm, "A");
-        addServiceArea(deliveryB, serviceRadiusKm, "B");
-        // 調整視野
-        fitBoundsToAllPoints();
-        // 顯示配送路徑資訊
-        displayRouteDetails(routeResultA, totalDistanceA, "A");
-        displayRouteDetails(routeResultB, totalDistanceB, "B");
-        // 標記節點
-        markAssignedOrders();
-        // 初始化動畫狀態
-        isAnimatingA = false;
-        isAnimatingB = false;
-      });
 
       // ======== 調整視野 ========
       function fitBoundsToAllPoints() {
@@ -849,10 +899,280 @@
         }
       });
 
-      // ======== 自動分配後標記節點 ========
-      markAssignedOrders();
+      // ======== 服務範圍控制按鈕事件處理 ========
+      document
+        .getElementById("toggle-service-A")
+        .addEventListener("click", () => {
+          const visibility = map.getLayoutProperty(
+            "A-service-area",
+            "visibility"
+          );
+          if (visibility === "visible") {
+            map.setLayoutProperty("A-service-area", "visibility", "none");
+            document.getElementById("toggle-service-A").textContent =
+              "顯示 A 服務範圍";
+          } else {
+            map.setLayoutProperty("A-service-area", "visibility", "visible");
+            document.getElementById("toggle-service-A").textContent =
+              "隱藏 A 服務範圍";
+          }
+        });
 
-      // ======== 自動分配函數標記節點 ========
+      document
+        .getElementById("toggle-service-B")
+        .addEventListener("click", () => {
+          const visibility = map.getLayoutProperty(
+            "B-service-area",
+            "visibility"
+          );
+          if (visibility === "visible") {
+            map.setLayoutProperty("B-service-area", "visibility", "none");
+            document.getElementById("toggle-service-B").textContent =
+              "顯示 B 服務範圍";
+          } else {
+            map.setLayoutProperty("B-service-area", "visibility", "visible");
+            document.getElementById("toggle-service-B").textContent =
+              "隱藏 B 服務範圍";
+          }
+        });
+
+      // ======== 初始化地圖並繪製路線與服務範圍 ========
+      map.on("load", async () => {
+        // 分配訂單
+        const { assignedA: initialA, assignedB: initialB } = assignOrders();
+        assignedA = initialA.filter((order) => order.id !== "E");
+        assignedB = initialB.filter((order) => order.id !== "D");
+
+        // 準備路徑
+        prepareRouteSequenceA();
+        prepareRouteSequenceB();
+
+        // 繪製配送員 A 的路線
+        await addRouteLayer(routeSequenceA, routeSegmentsA, "A");
+        // 繪製配送員 B 的路線
+        await addRouteLayer(routeSequenceB, routeSegmentsB, "B");
+        // 添加服務範圍圓形
+        addServiceArea(deliveryA, serviceRadiusKm, "A");
+        addServiceArea(deliveryB, serviceRadiusKm, "B");
+        // 調整視野
+        fitBoundsToAllPoints();
+        // 顯示配送路徑資訊
+        const { routeResult: routeResultA, totalDistance: totalDistanceA } =
+          calculateRoute(routeSequenceA);
+        const { routeResult: routeResultB, totalDistance: totalDistanceB } =
+          calculateRoute(routeSequenceB);
+        displayRouteDetails(routeResultA, totalDistanceA, "A");
+        displayRouteDetails(routeResultB, totalDistanceB, "B");
+        // 標記節點
+        markAssignedOrders();
+        // 初始化動畫狀態
+        isAnimatingA = false;
+        isAnimatingB = false;
+
+        // 模擬臨時訂單的插入
+        setTimeout(() => {
+          insertTemporaryOrderD();
+          insertTemporaryOrderE();
+        }, 5000); // 5秒後插入臨時訂單
+      });
+
+      // ======== 動態插入臨時訂單 ========
+      async function insertTemporaryOrderD() {
+        const tempOrderD = allOrders.find((o) => o.id === "D");
+        if (!tempOrderD) return;
+
+        // 分配訂單
+        const pickupPoint = turf.point([
+          tempOrderD.pickup.lng,
+          tempOrderD.pickup.lat,
+        ]);
+
+        const serviceAreaA = turf.circle(
+          [deliveryA.lng, deliveryA.lat],
+          serviceRadiusKm,
+          { steps: 64, units: "kilometers" }
+        );
+
+        const serviceAreaB = turf.circle(
+          [deliveryB.lng, deliveryB.lat],
+          serviceRadiusKm,
+          { steps: 64, units: "kilometers" }
+        );
+
+        const inA = turf.booleanPointInPolygon(pickupPoint, serviceAreaA);
+        const inB = turf.booleanPointInPolygon(pickupPoint, serviceAreaB);
+
+        if (inA && !inB) {
+          assignedA.push(tempOrderD);
+        } else if (!inA && inB) {
+          assignedB.push(tempOrderD);
+        } else if (inA && inB) {
+          // 計算距離，分配給最近的配送員
+          const distanceA = haversineDistance(tempOrderD.pickup, deliveryA);
+          const distanceB = haversineDistance(tempOrderD.pickup, deliveryB);
+          if (distanceA <= distanceB) {
+            assignedA.push(tempOrderD);
+          } else {
+            assignedB.push(tempOrderD);
+          }
+        } else {
+          // 不在任何服務範圍內，分配給最近的配送員
+          const distanceA = haversineDistance(tempOrderD.pickup, deliveryA);
+          const distanceB = haversineDistance(tempOrderD.pickup, deliveryB);
+          if (distanceA <= distanceB) {
+            assignedA.push(tempOrderD);
+          } else {
+            assignedB.push(tempOrderD);
+          }
+        }
+
+        // 更新路徑
+        prepareRouteSequenceA();
+        prepareRouteSequenceB();
+
+        // 清除舊的路線和服務範圍
+        clearOldRoutes("A");
+        clearOldRoutes("B");
+
+        // 繪製新的路線
+        await addRouteLayer(routeSequenceA, routeSegmentsA, "A");
+        await addRouteLayer(routeSequenceB, routeSegmentsB, "B");
+
+        // 添加服務範圍圓形
+        addServiceArea(deliveryA, serviceRadiusKm, "A");
+        addServiceArea(deliveryB, serviceRadiusKm, "B");
+
+        // 調整視野
+        fitBoundsToAllPoints();
+
+        // 顯示配送路徑資訊
+        const { routeResult: routeResultA, totalDistance: totalDistanceA } =
+          calculateRoute(routeSequenceA);
+        const { routeResult: routeResultB, totalDistance: totalDistanceB } =
+          calculateRoute(routeSequenceB);
+        displayRouteDetails(routeResultA, totalDistanceA, "A");
+        displayRouteDetails(routeResultB, totalDistanceB, "B");
+
+        // 標記節點
+        markAssignedOrders();
+      }
+
+      async function insertTemporaryOrderE() {
+        const tempOrderE = allOrders.find((o) => o.id === "E");
+        if (!tempOrderE) return;
+
+        // 分配訂單
+        const pickupPoint = turf.point([
+          tempOrderE.pickup.lng,
+          tempOrderE.pickup.lat,
+        ]);
+
+        const serviceAreaA = turf.circle(
+          [deliveryA.lng, deliveryA.lat],
+          serviceRadiusKm,
+          { steps: 64, units: "kilometers" }
+        );
+
+        const serviceAreaB = turf.circle(
+          [deliveryB.lng, deliveryB.lat],
+          serviceRadiusKm,
+          { steps: 64, units: "kilometers" }
+        );
+
+        const inA = turf.booleanPointInPolygon(pickupPoint, serviceAreaA);
+        const inB = turf.booleanPointInPolygon(pickupPoint, serviceAreaB);
+
+        if (inA && !inB) {
+          assignedA.push(tempOrderE);
+        } else if (!inA && inB) {
+          assignedB.push(tempOrderE);
+        } else if (inA && inB) {
+          // 計算距離，分配給最近的配送員
+          const distanceA = haversineDistance(tempOrderE.pickup, deliveryA);
+          const distanceB = haversineDistance(tempOrderE.pickup, deliveryB);
+          if (distanceA <= distanceB) {
+            assignedA.push(tempOrderE);
+          } else {
+            assignedB.push(tempOrderE);
+          }
+        } else {
+          // 不在任何服務範圍內，分配給最近的配送員
+          const distanceA = haversineDistance(tempOrderE.pickup, deliveryA);
+          const distanceB = haversineDistance(tempOrderE.pickup, deliveryB);
+          if (distanceA <= distanceB) {
+            assignedA.push(tempOrderE);
+          } else {
+            assignedB.push(tempOrderE);
+          }
+        }
+
+        // 更新路徑
+        prepareRouteSequenceA();
+        prepareRouteSequenceB();
+
+        // 清除舊的路線和服務範圍
+        clearOldRoutes("A");
+        clearOldRoutes("B");
+
+        // 繪製新的路線
+        await addRouteLayer(routeSequenceA, routeSegmentsA, "A");
+        await addRouteLayer(routeSequenceB, routeSegmentsB, "B");
+
+        // 添加服務範圍圓形
+        addServiceArea(deliveryA, serviceRadiusKm, "A");
+        addServiceArea(deliveryB, serviceRadiusKm, "B");
+
+        // 調整視野
+        fitBoundsToAllPoints();
+
+        // 顯示配送路徑資訊
+        const { routeResult: routeResultA, totalDistance: totalDistanceA } =
+          calculateRoute(routeSequenceA);
+        const { routeResult: routeResultB, totalDistance: totalDistanceB } =
+          calculateRoute(routeSequenceB);
+        displayRouteDetails(routeResultA, totalDistanceA, "A");
+        displayRouteDetails(routeResultB, totalDistanceB, "B");
+
+        // 標記節點
+        markAssignedOrders();
+      }
+
+      // ======== 清除舊的路線和服務範圍 ========
+      function clearOldRoutes(deliveryPersonId) {
+        // 清除路線
+        for (
+          let i = 0;
+          i <
+          (deliveryPersonId === "A"
+            ? routeSegmentsA.length
+            : routeSegmentsB.length);
+          i++
+        ) {
+          if (map.getLayer(`${deliveryPersonId}-route-${i}`)) {
+            map.removeLayer(`${deliveryPersonId}-route-${i}`);
+          }
+          if (map.getSource(`${deliveryPersonId}-route-${i}`)) {
+            map.removeSource(`${deliveryPersonId}-route-${i}`);
+          }
+        }
+
+        // 清除服務範圍
+        if (map.getLayer(`${deliveryPersonId}-service-area`)) {
+          map.removeLayer(`${deliveryPersonId}-service-area`);
+        }
+        if (map.getSource(`${deliveryPersonId}-service-area`)) {
+          map.removeSource(`${deliveryPersonId}-service-area`);
+        }
+
+        // 清除路徑座標
+        if (deliveryPersonId === "A") {
+          routeSegmentsA = [];
+        } else {
+          routeSegmentsB = [];
+        }
+      }
+
+      // ======== 自動分配後標記節點 ========
       function markAssignedOrders() {
         // 清除之前的標記（如果有）
         // 這裡假設沒有重複執行，否則需要清理現有的標記
