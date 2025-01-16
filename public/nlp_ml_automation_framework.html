@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <title>NLP 與機器學習驅動的自動化測試框架 (複雜示範)</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      #container {
+        max-width: 800px;
+        margin: auto;
+      }
+      h1,
+      h2 {
+        text-align: center;
+      }
+      .section {
+        margin-bottom: 30px;
+      }
+      textarea {
+        width: 100%;
+        height: 100px;
+      }
+      button {
+        padding: 10px 20px;
+        font-size: 16px;
+      }
+      #output {
+        background-color: #f9f9f9;
+        padding: 15px;
+        border: 1px solid #ddd;
+        height: 300px;
+        overflow-y: scroll;
+      }
+      .log-entry {
+        margin-bottom: 10px;
+      }
+      .log-entry span {
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <h1>NLP 與機器學習驅動的自動化測試框架 (複雜示範)</h1>
+
+      <div class="section" id="input-section">
+        <h2>輸入自然語言指令</h2>
+        <textarea
+          id="nlp-input"
+          placeholder="例如：檢查按鈕是否可點擊"
+        ></textarea>
+        <button id="process-btn">處理指令</button>
+      </div>
+
+      <div class="section" id="output-section">
+        <h2>框架輸出</h2>
+        <div id="output"></div>
+      </div>
+    </div>
+
+    <script>
+      /**
+       * ========================
+       *   STEP 1: NLP 解析邏輯
+       * ========================
+       */
+
+      // 擴展的同義詞庫
+      const synonymsDatabase = {
+        click_check: [
+          "檢查",
+          "按鈕",
+          "點擊",
+          "click",
+          "button",
+          "可點擊",
+          "確認按鈕",
+          "核對按鈕",
+        ],
+        scan_images: [
+          "掃描",
+          "圖片",
+          "image",
+          "scan",
+          "photo",
+          "pictures",
+          "影像",
+        ],
+        validate_title: ["驗證", "標題", "title", "check title", "確認標題"],
+        check_links: [
+          "檢查鏈接",
+          "檢查連結",
+          "鏈接",
+          "連結",
+          "link",
+          "links",
+          "確認鏈接",
+          "正常運作",
+          "運作",
+          "check links",
+        ],
+        validate_alt_text: ["驗證", "替代文字", "alt text", "確認替代文字"],
+        measure_load_time: ["測量", "加載時間", "load time", "確認加載速度"],
+        check_element_visibility: [
+          "檢查元素可見性",
+          "元素可見性",
+          "visible",
+          "確認元素是否可見",
+        ],
+      };
+
+      // 擴展的行動配置
+      const actionConfig = {
+        click_check: { actionType: "click_check", element: "button" },
+        scan_images: { actionType: "scan_images", element: "img" },
+        validate_title: { actionType: "validate_title", element: "h1" },
+        check_links: { actionType: "check_links", element: "a" },
+        validate_alt_text: { actionType: "validate_alt_text", element: "img" },
+        measure_load_time: {
+          actionType: "measure_load_time",
+          element: "window",
+        },
+        check_element_visibility: {
+          actionType: "check_element_visibility",
+          element: "specified_element",
+        },
+      };
+
+      // 停用詞 (stop words) 範例：在實際應用中可使用更完整的停用詞表
+      const stopWords = [
+        "是否",
+        "和",
+        "或",
+        "的",
+        "了",
+        "在",
+        "上",
+        "所有",
+        "為",
+        // "正常", // 移除 "正常" 以保留 "正常運作"
+      ];
+
+      /**
+       * 基於子字串匹配的方式來決定對應的行動：
+       * - 搜尋輸入中是否包含同義詞庫中的任何詞彙
+       * - 每匹配到一個同義詞，對應行動的分數加1
+       * - 選擇分數最高的行動
+       */
+      function parseNLPComplex(input) {
+        let bestAction = null;
+        let bestScore = -Infinity;
+
+        for (let actionKey in synonymsDatabase) {
+          const synonymsList = synonymsDatabase[actionKey];
+          let score = 0;
+
+          synonymsList.forEach((synonym) => {
+            if (input.includes(synonym)) {
+              score += 1;
+            }
+          });
+
+          if (score > bestScore) {
+            bestScore = score;
+            bestAction = actionKey;
+          }
+        }
+
+        if (bestScore <= 0) return null;
+        return actionConfig[bestAction];
+      }
+
+      /**
+       * =============================
+       *   STEP 2: 線性回歸權重邏輯
+       * =============================
+       */
+
+      /**
+       * 模擬一個更複雜的線性回歸權重計算流程：
+       *
+       * 我們假設有一個線性回歸模型： Score = w0 + w1*x1 + w2*x2 + ... + wn*xn
+       * - w0 是 bias
+       * - x1, x2, ..., xn 是根據動作類型、頁面上下文特徵、歷史成功率等所計算的特徵值
+       *
+       * 下方簡易實作會：
+       * 1. 建立一個「動作特徵向量」(actionFeature)。
+       * 2. 合併一些模擬的「頁面上下文特徵」(contextFeature)。
+       * 3. 簡單地與權重相乘加總產生預測分數。
+       */
+
+      // 已訓練好的（假設）線性回歸模型參數（僅為示範）
+      // 在實際應用中，這些參數應該是由大量歷史數據訓練而來。
+      const linearRegressionModel = {
+        // bias
+        bias: 0.2,
+        // 對應到 actionFeature + contextFeature 的權重 (示範用)
+        weights: [
+          0.8, // w1
+          0.5, // w2
+          0.3, // w3
+          0.9, // w4
+          0.1, // w5
+        ],
+      };
+
+      // 為不同動作指定一個簡易的特徵向量 (actionFeature)
+      // 各值代表這個動作在某些維度上的特徵強度（僅做示範）
+      const actionFeatureMapping = {
+        click_check: [1, 0, 1], // (feature1=1, feature2=0, feature3=1)
+        scan_images: [0, 1, 0], // (feature1=0, feature2=1, feature3=0)
+        validate_title: [1, 1, 0], // (feature1=1, feature2=1, feature3=0)
+        check_links: [1, 1, 1], // 假設 'check_links' 具有這些特徵
+        validate_alt_text: [0, 1, 1],
+        measure_load_time: [0, 0, 1],
+        check_element_visibility: [1, 0, 0],
+        unknown: [0, 0, 0],
+      };
+
+      /**
+       * 基於線性回歸模型預測分數
+       * @param {string} actionType - 行動類型
+       * @param {object} context - 頁面上下文（可包含各種特徵）
+       * @returns {number} 預測分數
+       */
+      function linearRegressionPredictComplex(actionType, context) {
+        // 1. 取得動作特徵
+        const actionFeat =
+          actionFeatureMapping[actionType] || actionFeatureMapping["unknown"];
+
+        // 2. 取得頁面上下文特徵 (示範)
+        // 在真實場景中，會根據 DOM 結構、元素數量、歷史成功率等產生多維度特徵
+        const contextFeat = computeContextFeature(context);
+
+        // 合併兩部分特徵：actionFeat(3 維) + contextFeat(2 維) = 5 維
+        const combinedFeatures = [...actionFeat, ...contextFeat];
+
+        // 3. 與模型權重做內積： sum( feature[i] * weight[i] ) + bias
+        let score = linearRegressionModel.bias;
+        combinedFeatures.forEach((feat, i) => {
+          score += feat * linearRegressionModel.weights[i];
+        });
+        return score;
+      }
+
+      /**
+       * 示範用：根據頁面上下文計算出 2 維特徵 (僅為範例)
+       * @param {object} context
+       * @returns {number[]}
+       */
+      function computeContextFeature(context) {
+        // 假設從 context 中取出一些指標
+        const domComplexity = context.domSize || 0; // DOM 元素數量 (示範)
+        const historySuccessRate = context.successRate || 0.5; // 歷史成功率 (0~1)
+
+        // 將這些指標再做一點轉換
+        const complexityFeature =
+          domComplexity > 1000 ? 1 : domComplexity / 1000; // 0~1 之間
+        const successFeature = historySuccessRate; // 直接使用
+
+        return [complexityFeature, successFeature];
+      }
+
+      /**
+       * ========================
+       *   STEP 3: 自動化行動執行
+       * ========================
+       */
+      function executeAction(action) {
+        return new Promise((resolve) => {
+          // 模擬動作執行花費一點時間
+          setTimeout(() => {
+            let result;
+            switch (action.actionType) {
+              case "click_check":
+                result = `已檢查 ${action.element} 是否可點擊。`;
+                break;
+              case "scan_images":
+                result = `已掃描所有 ${action.element} 元素。`;
+                break;
+              case "validate_title":
+                result = `已驗證頁面標題。`;
+                break;
+              case "check_links":
+                result = `已檢查所有 ${action.element} 是否正常運作。`;
+                break;
+              case "validate_alt_text":
+                result = `已驗證所有 ${action.element} 的替代文字。`;
+                break;
+              case "measure_load_time":
+                result = `已測量頁面的加載時間。`;
+                break;
+              case "check_element_visibility":
+                result = `已檢查指定元素的可見性。`;
+                break;
+              default:
+                result = `執行未知行動。`;
+            }
+            // 隨機決定執行成功/失敗（作為示範）
+            const isSuccess = Math.random() > 0.1; // 90% 可能成功
+            resolve({ success: isSuccess, message: result });
+          }, 1200);
+        });
+      }
+
+      /**
+       * ===========================
+       *   STEP 4: 結果回饋與模型調整
+       * ===========================
+       */
+      function feedbackModel(action, success) {
+        // 在這裡可以動態調整模型權重。這裡僅做示範：
+        // 如果成功，我們就稍微增強對應行動特徵的權重；若失敗則減少。
+        const adjustment = success ? 0.01 : -0.01;
+        const actionFeat = actionFeatureMapping[action.actionType] || [0, 0, 0];
+
+        // 模擬對應到 weights 陣列前 3 個（actionFeat 部分）進行調整
+        for (let i = 0; i < actionFeat.length; i++) {
+          linearRegressionModel.weights[i] += adjustment * actionFeat[i];
+        }
+
+        // 這裡僅是非常粗略的示範，實際應用中須考慮學習率、正則化等
+        // console.log('new weights = ', linearRegressionModel.weights);
+      }
+
+      /**
+       * ========================
+       *   輸出日誌的工具函式
+       * ========================
+       */
+      function logOutput(message, type = "info") {
+        const outputDiv = document.getElementById("output");
+        const entry = document.createElement("div");
+        entry.className = "log-entry";
+        if (type === "success") {
+          entry.innerHTML = `<span>成功:</span> ${message}`;
+        } else if (type === "error") {
+          entry.innerHTML = `<span>錯誤:</span> ${message}`;
+        } else {
+          entry.innerHTML = `<span>資訊:</span> ${message}`;
+        }
+        outputDiv.appendChild(entry);
+        outputDiv.scrollTop = outputDiv.scrollHeight;
+      }
+
+      /**
+       * ========================
+       *   主流程事件處理
+       * ========================
+       */
+      document
+        .getElementById("process-btn")
+        .addEventListener("click", async () => {
+          const input = document.getElementById("nlp-input").value.trim();
+          if (!input) {
+            alert("請輸入自然語言指令。");
+            return;
+          }
+
+          // 輸出收到的指令
+          logOutput(`收到指令: "${input}"`);
+
+          // STEP 1: NLP 解析
+          const parsedAction = parseNLPComplex(input);
+          if (!parsedAction) {
+            logOutput("無法解析指令，請嘗試更精確的描述。", "error");
+            return;
+          }
+          logOutput(
+            `解析後的行動: ${parsedAction.actionType}, 元素: ${parsedAction.element}`
+          );
+
+          // STEP 2: 線性回歸預測分數
+          // 模擬一個頁面上下文 (domSize: DOM 元素數, successRate: 歷史成功率)
+          const context = {
+            domSize: Math.floor(Math.random() * 2000), // 0~2000
+            successRate: 0.6 + Math.random() * 0.4, // 0.6 ~ 1.0
+          };
+          logOutput(
+            `模擬網頁上下文: DOM 大小 = ${context.domSize}, 歷史成功率 = ${context.successRate.toFixed(
+              2
+            )}`
+          );
+
+          const score = linearRegressionPredictComplex(
+            parsedAction.actionType,
+            context
+          );
+          logOutput(`預測分數: ${score.toFixed(2)}`);
+
+          // 只有一個行動可選時，直接執行
+          logOutput(`選擇執行行動: ${parsedAction.actionType}`);
+
+          // STEP 3: 自動化行動執行
+          const executionResult = await executeAction(parsedAction);
+          if (executionResult.success) {
+            logOutput(executionResult.message, "success");
+          } else {
+            logOutput(executionResult.message, "error");
+          }
+
+          // STEP 4: 結果回饋與模型調整
+          feedbackModel(parsedAction, executionResult.success);
+          logOutput(`已回饋模型，更新 ${parsedAction.actionType} 的對應權重。`);
+        });
+    </script>
+  </body>
+</html>
