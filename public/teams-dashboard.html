@@ -1,0 +1,471 @@
+<!-- teams-dashboard.html -->
+
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Microsoft Teams 專屬頁面展示</title>
+    <!-- 引入 Ant Design 的 CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/antd/4.23.4/antd.min.css"
+      integrity="sha512-Xm5QtlB8gX+Y/yVVJ8Zn1O9PjuJ9nUv8bIXjAd1yb5R3aB/7gT9mVgklqDkZj5u+Gfc3gI+1YbgMGgJ1V0xk6Q=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <!-- 引入 Ant Design Icons 的 CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/ant-design-icons/4.7.0/antd-icons.min.css"
+      integrity="sha512-6cX7LY4BtZ+SnwUrSxP1wPG8BJJrXX8Zjh3qKTw7YWxxDg+/VnxdK6Ivz+e/QFqE6q38FqkB1tmk0IGRPA7A+A=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <!-- 引入自定義樣式 -->
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background-color: #f4f4f4;
+      }
+      h1 {
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 40px;
+      }
+      .container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 40px;
+        justify-content: center;
+      }
+      .ant-card {
+        width: 100%;
+        max-width: 600px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+      .ant-card-head {
+        background-color: #fafafa;
+        border-bottom: none;
+      }
+      .ant-card-head-title {
+        display: flex;
+        align-items: center;
+        font-size: 1.25em;
+        font-weight: bold;
+        color: #1890ff;
+      }
+      .ant-card-head-title .anticon {
+        margin-right: 8px;
+        font-size: 1.5em;
+        color: #1890ff;
+      }
+      .search-box {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .search-box input {
+        flex: 1;
+        margin-right: 10px;
+        padding: 10px;
+        font-size: 1em;
+      }
+      .filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+      .filters .ant-btn {
+        display: flex;
+        align-items: center;
+        padding: 8px 16px;
+        font-size: 1em;
+        font-weight: 500;
+      }
+      .filters .ant-btn .anticon {
+        margin-right: 5px;
+        font-size: 1.2em;
+      }
+      .results {
+        margin-top: 10px;
+      }
+      .result-item {
+        padding: 12px 16px;
+        border-bottom: 1px solid #f0f0f0;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        transition: background-color 0.3s;
+        font-size: 1em;
+      }
+      .result-item:hover {
+        background-color: #e6f7ff;
+      }
+      .result-item .anticon {
+        margin-right: 12px;
+        font-size: 1.2em;
+        color: #1890ff;
+      }
+      form {
+        display: flex;
+        flex-direction: column;
+      }
+      form label {
+        margin-top: 15px;
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+        font-weight: 500;
+      }
+      form label .anticon {
+        margin-right: 8px;
+        font-size: 1.2em;
+        color: #1890ff;
+      }
+      form .ant-input,
+      form .ant-select-selector,
+      form .ant-input-textarea {
+        width: 100%;
+        padding: 10px;
+        font-size: 1em;
+      }
+      form .ant-upload {
+        margin-top: 15px;
+      }
+      form .ant-upload .ant-btn {
+        display: flex;
+        align-items: center;
+        padding: 8px 16px;
+        font-size: 1em;
+      }
+      form .ant-upload .ant-btn .anticon {
+        margin-right: 5px;
+        font-size: 1.2em;
+      }
+      .ant-btn-primary {
+        background-color: #1890ff;
+        border-color: #1890ff;
+        font-weight: 500;
+      }
+      .ant-btn-primary:hover,
+      .ant-btn-primary:focus {
+        background-color: #40a9ff;
+        border-color: #40a9ff;
+      }
+      .status {
+        margin-top: 30px;
+      }
+      .status h3 {
+        display: flex;
+        align-items: center;
+        font-size: 1.2em;
+        color: #2c3e50;
+        margin-bottom: 15px;
+      }
+      .status h3 .anticon {
+        margin-right: 8px;
+        font-size: 1.5em;
+        color: #52c41a;
+      }
+      .status-item {
+        padding: 12px 16px;
+        border: 1px solid #2c3e50;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        background-color: #fafafa;
+        display: flex;
+        align-items: center;
+        font-size: 1em;
+      }
+      .status-item .anticon {
+        margin-right: 10px;
+        font-size: 1.5em;
+      }
+      .notification {
+        margin-top: 20px;
+        padding: 12px 16px;
+        background-color: #dff0d8;
+        border: 1px solid #3c763d;
+        border-radius: 8px;
+        display: none;
+        align-items: center;
+        font-size: 1em;
+        color: #3c763d;
+      }
+      .notification .anticon {
+        margin-right: 10px;
+        font-size: 1.5em;
+      }
+
+      /* 增強響應式設計 */
+      @media (max-width: 768px) {
+        .container {
+          flex-direction: column;
+          align-items: center;
+        }
+        .ant-card {
+          max-width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Microsoft Teams 專屬頁面展示</h1>
+
+    <div class="container">
+      <!-- 資訊查詢模組 -->
+      <div class="ant-card ant-card-bordered" id="info-query">
+        <div class="ant-card-head">
+          <div class="ant-card-head-title">
+            <i class="anticon anticon-search"></i>資訊查詢
+          </div>
+        </div>
+        <div class="ant-card-body">
+          <div class="search-box">
+            <input
+              type="text"
+              id="search-input"
+              class="ant-input"
+              placeholder="輸入關鍵字搜索..."
+            />
+            <button class="ant-btn ant-btn-primary" onclick="performSearch()">
+              <i class="anticon anticon-search"></i>搜索
+            </button>
+          </div>
+          <div class="filters">
+            <button
+              class="ant-btn ant-btn-primary"
+              onclick="filterResults('所有')"
+            >
+              <i class="anticon anticon-appstore"></i>所有
+            </button>
+            <button
+              class="ant-btn ant-btn-secondary"
+              onclick="filterResults('文檔')"
+            >
+              <i class="anticon anticon-file-text"></i>文檔
+            </button>
+            <button
+              class="ant-btn ant-btn-secondary"
+              onclick="filterResults('會議記錄')"
+            >
+              <i class="anticon anticon-calendar"></i>會議記錄
+            </button>
+            <button
+              class="ant-btn ant-btn-secondary"
+              onclick="filterResults('部門資訊')"
+            >
+              <i class="anticon anticon-team"></i>部門資訊
+            </button>
+          </div>
+          <div class="results" id="search-results">
+            <!-- 模擬搜索結果 -->
+            <div class="result-item" data-category="文檔">
+              <i class="anticon anticon-file-text"></i>公司政策手冊
+            </div>
+            <div class="result-item" data-category="會議記錄">
+              <i class="anticon anticon-calendar"></i>2024年第一季度會議記錄
+            </div>
+            <div class="result-item" data-category="部門資訊">
+              <i class="anticon anticon-team"></i>人力資源部門介紹
+            </div>
+            <div class="result-item" data-category="文檔">
+              <i class="anticon anticon-file-text"></i>員工手冊
+            </div>
+            <div class="result-item" data-category="會議記錄">
+              <i class="anticon anticon-calendar"></i>技術部門月會記錄
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 問題提交模組 -->
+      <div class="ant-card ant-card-bordered" id="issue-submit">
+        <div class="ant-card-head">
+          <div class="ant-card-head-title">
+            <i class="anticon anticon-form"></i>問題提交
+          </div>
+        </div>
+        <div class="ant-card-body">
+          <form id="issue-form" onsubmit="submitIssue(event)">
+            <label for="title">
+              <i class="anticon anticon-edit"></i>標題
+            </label>
+            <input
+              type="text"
+              id="title"
+              name="title"
+              class="ant-input"
+              required
+            />
+
+            <label for="description">
+              <i class="anticon anticon-file-text"></i>描述
+            </label>
+            <textarea
+              id="description"
+              name="description"
+              rows="4"
+              class="ant-input ant-input-textarea"
+              required
+            ></textarea>
+
+            <label for="category">
+              <i class="anticon anticon-appstore"></i>類別
+            </label>
+            <select
+              id="category"
+              name="category"
+              class="ant-select-selector"
+              required
+            >
+              <option value="">選擇類別</option>
+              <option value="技術">技術</option>
+              <option value="人力資源">人力資源</option>
+              <option value="行政">行政</option>
+              <option value="其他">其他</option>
+            </select>
+
+            <label for="priority">
+              <i class="anticon anticon-exclamation-circle"></i>優先級
+            </label>
+            <select
+              id="priority"
+              name="priority"
+              class="ant-select-selector"
+              required
+            >
+              <option value="">選擇優先級</option>
+              <option value="低">低</option>
+              <option value="中">中</option>
+              <option value="高">高</option>
+            </select>
+
+            <label for="attachment">
+              <i class="anticon anticon-paper-clip"></i>附件上傳
+            </label>
+            <div class="ant-upload ant-upload-select ant-upload-select-text">
+              <input type="file" id="attachment" name="attachment" />
+              <button
+                type="button"
+                class="ant-btn ant-btn-default"
+                onclick="document.getElementById('attachment').click()"
+              >
+                <i class="anticon anticon-upload"></i>選擇文件
+              </button>
+            </div>
+
+            <button
+              type="submit"
+              class="ant-btn ant-btn-primary"
+              style="margin-top: 20px"
+            >
+              <i class="anticon anticon-send"></i>提交問題
+            </button>
+          </form>
+
+          <div class="status">
+            <h3><i class="anticon anticon-safety-certificate"></i>問題狀態</h3>
+            <div class="status-item">
+              <i
+                class="anticon anticon-check-circle"
+                style="color: #52c41a"
+              ></i>
+              問題 #001 - 已提交
+            </div>
+            <div class="status-item">
+              <i class="anticon anticon-hourglass" style="color: #faad14"></i>
+              問題 #002 - 進行中
+            </div>
+            <div class="status-item">
+              <i
+                class="anticon anticon-check-circle"
+                style="color: #52c41a"
+              ></i>
+              問題 #003 - 已解決
+            </div>
+          </div>
+
+          <div class="notification" id="notification">
+            <i class="anticon anticon-check-circle"></i>問題已成功提交！
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 引入 Ant Design 的 JavaScript (可選，視需要使用) -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/antd/4.23.4/antd.min.js"
+      integrity="sha512-..."
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+
+    <!-- 引入 Ant Design Icons 的 JavaScript -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/ant-design-icons/4.7.0/antd-icons.min.js"
+      integrity="sha512-N3FjpOT3mm1BbNRcpkyGPY9dDwq3hLr/Fe+KwNNpO7a9lDLGawLtp+VwjHO88Fh3e3+1dhfZsTZV5H1lIvcYfQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+
+    <!-- 自定義 JavaScript -->
+    <script>
+      // 模擬搜索功能
+      function performSearch() {
+        const query = document
+          .getElementById("search-input")
+          .value.toLowerCase();
+        const results = document.querySelectorAll(".result-item");
+        results.forEach((item) => {
+          if (item.textContent.toLowerCase().includes(query)) {
+            item.style.display = "flex";
+          } else {
+            item.style.display = "none";
+          }
+        });
+      }
+
+      // 模擬篩選功能
+      function filterResults(category) {
+        const results = document.querySelectorAll(".result-item");
+        results.forEach((item) => {
+          if (
+            category === "所有" ||
+            item.getAttribute("data-category") === category
+          ) {
+            item.style.display = "flex";
+          } else {
+            item.style.display = "none";
+          }
+        });
+      }
+
+      // 模擬問題提交功能
+      function submitIssue(event) {
+        event.preventDefault();
+        // 這裡可以添加實際的提交邏輯，如使用Fetch API發送數據到伺服器
+        // 現在僅顯示通知
+        document.getElementById("notification").style.display = "flex";
+        // 重置表單
+        document.getElementById("issue-form").reset();
+        // 隱藏通知 after 3 seconds
+        setTimeout(() => {
+          document.getElementById("notification").style.display = "none";
+        }, 3000);
+      }
+
+      // 點擊結果項目模擬導航
+      const resultItems = document.querySelectorAll(".result-item");
+      resultItems.forEach((item) => {
+        item.addEventListener("click", () => {
+          alert(`導航到：${item.textContent.trim()}`);
+          // 這裡可以添加實際的導航邏輯
+        });
+      });
+    </script>
+  </body>
+</html>
