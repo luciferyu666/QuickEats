@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>股票篩選與自動交易系統</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/antd/4.23.5/antd.min.css"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>股票篩選與自動交易系統</h1>
+
+      <!-- Controls Card -->
+      <div class="card">
+        <div class="controls">
+          <input
+            type="text"
+            id="ticker"
+            placeholder="輸入股票代碼 (如: 2330.TW)"
+            class="ant-input"
+          />
+          <select id="timeframe" class="ant-select">
+            <option value="1m">1 分鐘</option>
+            <option value="5m">5 分鐘</option>
+            <option value="15m">15 分鐘</option>
+            <option value="1d">日線</option>
+            <option value="1wk">週線</option>
+            <option value="1mo">月線</option>
+          </select>
+          <button id="fetch-data" class="ant-btn ant-btn-primary">
+            抓取數據
+          </button>
+        </div>
+      </div>
+
+      <!-- Stock Data Card -->
+      <div class="card">
+        <h2>股票數據</h2>
+        <table class="ant-table">
+          <thead>
+            <tr>
+              <th>時間</th>
+              <th>收盤價</th>
+              <th>RSI</th>
+              <th>KD 黃金交叉</th>
+              <th>MACD 信號</th>
+              <th>布林帶上界</th>
+              <th>布林帶下界</th>
+            </tr>
+          </thead>
+          <tbody id="data-body"></tbody>
+        </table>
+      </div>
+
+      <!-- Charts Card -->
+      <div class="card">
+        <h2>圖表展示</h2>
+        <div class="chart-controls">
+          <label for="chart-type-toggle">圖表類型:</label>
+          <select id="chart-type-toggle" class="ant-select">
+            <option value="line">線形圖</option>
+            <option value="bar">柱狀圖</option>
+          </select>
+        </div>
+        <canvas id="price-chart"></canvas>
+        <canvas id="indicator-chart"></canvas>
+      </div>
+
+      <!-- Auto Trade Card -->
+      <div class="card">
+        <h2>自動交易</h2>
+        <button id="place-order" class="ant-btn ant-btn-danger">
+          模擬下單
+        </button>
+        <div id="trade-status"></div>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
