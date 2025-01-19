@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Haskell 並發模擬</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/antd/4.24.11/antd.min.css"
+    />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f0f2f5;
+      }
+      header {
+        background-color: #0078d7;
+        color: white;
+        padding: 20px;
+        text-align: center;
+      }
+      main {
+        padding: 20px;
+        max-width: 800px;
+        margin: auto;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      .ant-card {
+        margin-bottom: 20px;
+      }
+      .ant-btn-primary {
+        width: 100%;
+        font-size: 1.2em;
+        font-weight: bold;
+        padding: 10px;
+      }
+      footer {
+        text-align: center;
+        padding: 10px;
+        margin-top: 20px;
+        color: #666;
+        font-size: 0.9em;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Haskell 並發模擬</h1>
+      <p>模擬伺服器與用戶端使用線程的交互</p>
+    </header>
+    <main>
+      <div class="ant-card ant-card-bordered">
+        <div class="ant-card-body">
+          <h2>關於模擬</h2>
+          <p>此範例展示了在 Haskell 中的並發計算模型，其中：</p>
+          <ul>
+            <li><b>伺服器線程</b> 依序處理用戶端請求。</li>
+            <li>十個 <b>用戶端線程</b> 隨機時間間隔發送請求。</li>
+          </ul>
+          <p>伺服器維護一個請求佇列，並依到達順序處理這些請求。</p>
+        </div>
+      </div>
+      <div class="ant-card ant-card-bordered">
+        <div class="ant-card-body">
+          <h2>即時日誌</h2>
+          <pre
+            id="log"
+            style="
+              height: 200px;
+              overflow-y: auto;
+              border: 1px solid #d9d9d9;
+              padding: 10px;
+              background-color: #f5f5f5;
+            "
+          >
+開始模擬...
+          </pre>
+        </div>
+      </div>
+      <button id="addRequest" class="ant-btn ant-btn-primary">
+        新增用戶端請求
+      </button>
+    </main>
+    <footer>
+      <p>由 Haskell 提供支援 | 線程與並發模擬</p>
+    </footer>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/antd/4.24.11/antd.min.js"></script>
+    <script>
+      // 模擬動態日誌更新
+      const logElement = document.getElementById("log");
+      const addRequestButton = document.getElementById("addRequest");
+
+      const logs = [
+        "用戶端 1 發送: GET /data/1",
+        "用戶端 3 發送: GET /data/3",
+        "伺服器處理: GET /data/1",
+        "用戶端 2 發送: GET /data/2",
+        "伺服器處理: GET /data/3",
+        "伺服器處理: GET /data/2",
+        "用戶端 4 發送: GET /data/4",
+        "伺服器處理: GET /data/4",
+      ];
+
+      let logIndex = 0;
+      let clientCounter = 5; // 用於計算新增的用戶端編號
+
+      function updateLog() {
+        if (logIndex < logs.length) {
+          logElement.textContent += `\n${logs[logIndex]}`;
+          logElement.scrollTop = logElement.scrollHeight; // 自動滾動到最新
+          logIndex++;
+        }
+      }
+
+      function addNewRequest() {
+        const newClientId = clientCounter++;
+        const newRequest = `用戶端 ${newClientId} 發送: GET /data/${newClientId}`;
+        logs.push(newRequest, `伺服器處理: GET /data/${newClientId}`);
+        logElement.textContent += `\n${newRequest}`;
+        logElement.scrollTop = logElement.scrollHeight; // 自動滾動到最新
+      }
+
+      setInterval(updateLog, 1000); // 模擬每秒更新一次日誌
+      addRequestButton.addEventListener("click", addNewRequest);
+    </script>
+  </body>
+</html>
