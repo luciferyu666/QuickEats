@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>社交 App</title>
+    <!-- Tailwind CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <!-- React & ReactDOM (UMD 版本) -->
+    <script src="https://cdn.jsdelivr.net/npm/react@17/umd/react.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@17/umd/react-dom.production.min.js"></script>
+    <!-- Ant Design CSS -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/antd/4.23.0/antd.min.css"
+      rel="stylesheet"
+    />
+    <!-- Ant Design JS (UMD 版本) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/antd/4.23.0/antd.min.js"></script>
+    <!-- WebRTC Adapter（若需實際通話功能） -->
+    <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+  </head>
+
+  <body class="bg-gray-100 font-sans leading-normal tracking-normal">
+    <header class="bg-blue-500 text-white p-4 shadow-md">
+      <div class="container mx-auto">
+        <h1 class="text-2xl">社交 App</h1>
+      </div>
+    </header>
+
+    <main class="container mx-auto p-4">
+      <!-- 通話功能 -->
+      <section id="call" class="bg-white p-4 rounded shadow-md mb-6">
+        <h2 class="text-xl font-bold mb-4">穩定通話功能（模擬）</h2>
+        <div class="flex flex-col space-y-4">
+          <!-- 操作按鈕列 -->
+          <div class="flex items-center space-x-2">
+            <button id="startCall" class="ant-btn ant-btn-primary ant-btn-lg">
+              開始通話
+            </button>
+            <button
+              id="endCall"
+              class="ant-btn ant-btn-danger ant-btn-lg"
+              disabled
+            >
+              結束通話
+            </button>
+            <button
+              id="muteToggle"
+              class="ant-btn ant-btn-default ant-btn-lg"
+              disabled
+            >
+              靜音
+            </button>
+            <button
+              id="videoToggle"
+              class="ant-btn ant-btn-default ant-btn-lg"
+              disabled
+            >
+              關閉視訊
+            </button>
+          </div>
+
+          <!-- 視訊畫面區（模擬） -->
+          <div class="flex space-x-4">
+            <video
+              id="localVideo"
+              autoplay
+              muted
+              class="w-32 h-32 border rounded bg-gray-200"
+            ></video>
+            <video
+              id="remoteVideo"
+              autoplay
+              class="w-32 h-32 border rounded bg-gray-200"
+            ></video>
+          </div>
+        </div>
+      </section>
+
+      <!-- 點數系統 -->
+      <section id="points" class="bg-white p-4 rounded shadow-md mb-6">
+        <h2 class="text-xl font-bold mb-4">點數系統</h2>
+        <div class="flex flex-col space-y-4">
+          <!-- 目前點數 + 原本的循環充值按鈕 -->
+          <div class="flex justify-between items-center">
+            <div>
+              <p>您的點數餘額：</p>
+              <span id="userPoints" class="text-lg font-bold">1000</span>
+            </div>
+            <button id="addPoints" class="ant-btn ant-btn-primary ant-btn-lg">
+              （原）模擬充值
+            </button>
+          </div>
+
+          <!-- 快速充值按鈕 -->
+          <div>
+            <p class="font-bold">快速充值：</p>
+            <button
+              class="ant-btn ant-btn-default mr-2"
+              onclick="quickRecharge(50)"
+            >
+              50
+            </button>
+            <button
+              class="ant-btn ant-btn-default mr-2"
+              onclick="quickRecharge(100)"
+            >
+              100
+            </button>
+            <button
+              class="ant-btn ant-btn-default mr-2"
+              onclick="quickRecharge(200)"
+            >
+              200
+            </button>
+          </div>
+
+          <!-- 自定義充值 + 查看充值紀錄 -->
+          <div>
+            <button
+              id="customRechargeBtn"
+              class="ant-btn ant-btn-primary ant-btn-lg mr-2"
+            >
+              自定義充值
+            </button>
+            <button
+              id="viewHistoryBtn"
+              class="ant-btn ant-btn-default ant-btn-lg"
+            >
+              查看充值紀錄
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 商品兌換(商城)功能 -->
+      <section id="redeem" class="bg-white p-4 rounded shadow-md">
+        <h2 class="text-xl font-bold mb-4">兌換功能 (商城)</h2>
+        <div class="flex space-x-2">
+          <!-- 查看商城商品 -->
+          <button id="openStoreBtn" class="ant-btn ant-btn-primary ant-btn-lg">
+            查看商城
+          </button>
+          <!-- 查看兌換紀錄 -->
+          <button
+            id="redeemHistoryBtn"
+            class="ant-btn ant-btn-default ant-btn-lg"
+          >
+            查看兌換紀錄
+          </button>
+          <!-- 模擬管理員 -->
+          <button
+            id="manageItemsBtn"
+            class="ant-btn ant-btn-default ant-btn-lg"
+          >
+            管理商品
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <!-- 各功能拆分的 .js 檔案 -->
+    <script src="./call.js"></script>
+    <script src="./points.js"></script>
+    <script src="./store.js"></script>
+  </body>
+</html>
