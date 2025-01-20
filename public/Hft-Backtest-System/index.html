@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <title>高頻交易回測系統 - 範例</title>
+
+    <!-- 引入 Ant Design CSS (純樣式) -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/antd@4.23.7/dist/antd.min.css"
+    />
+
+    <!-- 引入圖表套件 (Chart.js 為示例，可依實際需求選擇其他繪圖工具) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- 可視需要引入 Ant Design JS (此處僅保留以防後續擴充需求) -->
+    <script src="https://cdn.jsdelivr.net/npm/antd@4.23.7/dist/antd.min.js"></script>
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background-color: #f7f7f7;
+      }
+      h1 {
+        text-align: center;
+      }
+      .ant-card {
+        margin: 20px 0;
+      }
+      /* 原本的 section 樣式仍可保留或調整 */
+      .section {
+        /* background-color: #fff; */
+        /* padding: 20px; */
+        /* margin: 20px 0; */
+        /* border-radius: 6px; */
+        /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); */
+      }
+      code {
+        background-color: #f0f0f0;
+        padding: 2px 4px;
+        border-radius: 4px;
+      }
+      .chart-container {
+        width: 80%;
+        margin: 0 auto;
+      }
+      .ant-btn {
+        margin-right: 10px;
+      }
+      /* 用於顯示日誌 */
+      #logOutput {
+        white-space: pre-wrap;
+        font-family: Consolas, monospace;
+        background: #fff;
+        padding: 10px;
+        margin: 20px 0;
+        border: 1px solid #ddd;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>高頻交易回測系統 - 範例</h1>
+
+    <!-- *********************************** -->
+    <!-- 1. 系統架構設計 -->
+    <!-- *********************************** -->
+    <div class="section ant-card ant-card-bordered">
+      <div class="ant-card-body">
+        <h2>1. 系統架構設計</h2>
+        <p>本系統包含以下模組：</p>
+        <ol>
+          <li>數據處理模組</li>
+          <li>回測引擎模組</li>
+          <li>性能優化模組</li>
+          <li>結果可視化模組</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- *********************************** -->
+    <!-- 2. 數據處理模組 -->
+    <!-- *********************************** -->
+    <div class="section ant-card ant-card-bordered">
+      <div class="ant-card-body">
+        <h2>2. 數據處理模組</h2>
+        <p>
+          此模組負責訂單簿的重建、動態更新與累積深度計算等，為回測邏輯提供核心數據支援。
+        </p>
+        <pre><code>
+// 假設快照數據與更新數據如下 (更豐富的範例資料)
+const snapshotData = [
+  { price: 100, volume: 10, side: 'buy' },
+  { price: 101, volume: 5,  side: 'buy' },
+  { price: 99,  volume: 15, side: 'buy' },
+  { price: 102, volume: 2,  side: 'sell' },
+  { price: 103, volume: 8,  side: 'sell' },
+  { price: 105, volume: 3,  side: 'sell' },
+  // 更多模擬資料
+  { price: 98,  volume: 1,  side: 'buy' },
+  { price: 104, volume: 10, side: 'sell' }
+];
+
+const updateData = [
+  // 原本示例
+  { updateType: 'new',   price: 101, volume: 3,  side: 'sell' },
+  { updateType: 'trade', price: 100, volume: 2,  side: 'buy' },
+  { updateType: 'cancel',price: 102, volume: 2,  side: 'sell' },
+
+  // 新增多筆資料以模擬更頻繁的市場情況
+  { updateType: 'new',   price: 99,  volume: 5,  side: 'buy' },
+  { updateType: 'trade', price: 103, volume: 4,  side: 'sell' },
+  { updateType: 'cancel',price: 101, volume: 5,  side: 'buy' },
+  { updateType: 'new',   price: 104, volume: 2,  side: 'sell' },
+  { updateType: 'trade', price: 99,  volume: 3,  side: 'buy' },
+  { updateType: 'new',   price: 98,  volume: 10, side: 'buy' }
+];
+
+// 訂單簿結構 (簡化示例)
+let orderBook = {
+  buy: {},  // { price: volume }
+  sell: {}  // { price: volume }
+};
+
+// 初始化訂單簿
+function initOrderBook(snapshot) {
+  snapshot.forEach(entry => {
+    if (entry.side === 'buy') {
+      orderBook.buy[entry.price] = (orderBook.buy[entry.price] || 0) + entry.volume;
+    } else {
+      orderBook.sell[entry.price] = (orderBook.sell[entry.price] || 0) + entry.volume;
+    }
+  });
+}
+
+// 更新訂單簿
+function updateOrderBook(update) {
+  const { updateType, price, volume, side } = update;
+  
+  switch(updateType) {
+    case 'new':
+      // 新增掛單
+      if (side === 'buy') {
+        orderBook.buy[price] = (orderBook.buy[price] || 0) + volume;
+      } else {
+        orderBook.sell[price] = (orderBook.sell[price] || 0) + volume;
+      }
+      break;
+
+    case 'trade':
+      // 成交邏輯 (此處僅示意，實際需更多檢查)
+      if (side === 'buy') {
+        if (orderBook.sell[price]) {
+          let matchedVol = Math.min(orderBook.sell[price], volume);
+          orderBook.sell[price] -= matchedVol;
+          if (orderBook.sell[price] <= 0) delete orderBook.sell[price];
+        }
+      } else {
+        if (orderBook.buy[price]) {
+          let matchedVol = Math.min(orderBook.buy[price], volume);
+          orderBook.buy[price] -= matchedVol;
+          if (orderBook.buy[price] <= 0) delete orderBook.buy[price];
+        }
+      }
+      break;
+
+    case 'cancel':
+      // 撤單邏輯 (此處亦簡化，實際需考慮剩餘數量等)
+      if (side === 'buy' && orderBook.buy[price]) {
+        orderBook.buy[price] -= volume;
+        if (orderBook.buy[price] <= 0) delete orderBook.buy[price];
+      } else if (side === 'sell' && orderBook.sell[price]) {
+        orderBook.sell[price] -= volume;
+        if (orderBook.sell[price] <= 0) delete orderBook.sell[price];
+      }
+      break;
+
+    default:
+      console.log('未知的更新類型');
+  }
+}
+
+// 計算累積深度
+function calculateCumulativeDepth() {
+  let buyDepth = 0;
+  let sellDepth = 0;
+  for (let p in orderBook.buy) {
+    buyDepth += orderBook.buy[p];
+  }
+  for (let p in orderBook.sell) {
+    sellDepth += orderBook.sell[p];
+  }
+  return { buyDepth, sellDepth };
+}
+        </code></pre>
+      </div>
+    </div>
+
+    <!-- *********************************** -->
+    <!-- 3. 回測引擎模組 -->
+    <!-- *********************************** -->
+    <div class="section ant-card ant-card-bordered">
+      <div class="ant-card-body">
+        <h2>3. 回測引擎模組</h2>
+        <p>此模組實現掛單、成交、撤單、風險控制與持倉管理的回測流程。</p>
+        <pre><code>
+let position = 0;        // 持倉 (正數代表多單，負數代表空單)
+let cashBalance = 10000; // 初始資金
+let tradeHistory = [];   // 記錄每筆交易
+
+function placeOrder(price, volume, side) {
+  updateOrderBook({ updateType: 'new', price, volume, side });
+}
+
+function executeTrade(price, volume, side) {
+  updateOrderBook({ updateType: 'trade', price, volume, side });
+  
+  let cost = price * volume;
+  if (side === 'buy') {
+    position += volume;
+    cashBalance -= cost;
+  } else {
+    position -= volume;
+    cashBalance += cost;
+  }
+  
+  tradeHistory.push({
+    timestamp: Date.now(),
+    price,
+    volume,
+    side,
+    position,
+    cashBalance
+  });
+}
+
+function cancelOrder(price, volume, side) {
+  updateOrderBook({ updateType: 'cancel', price, volume, side });
+}
+
+// 風險控制與持倉管理 (範例)
+function riskControl(maxPosition) {
+  if (Math.abs(position) > maxPosition) {
+    logToPage('警告：持倉超過最大限制！');
+  }
+}
+        </code></pre>
+      </div>
+    </div>
+
+    <!-- *********************************** -->
+    <!-- 4. 性能優化模組 -->
+    <!-- *********************************** -->
+    <div class="section ant-card ant-card-bordered">
+      <div class="ant-card-body">
+        <h2>4. 性能優化模組</h2>
+        <p>
+          此處示意以批量處理及簡易的「模擬異步」來展示如何加速處理訂單簿更新與回測事件。
+        </p>
+        <pre><code>
+// 批量處理示例
+function batchProcessUpdates(updates) {
+  updates.forEach(update => {
+    updateOrderBook(update);
+  });
+}
+
+// 模擬異步處理 (實際可使用 Web Worker、多線程框架或其他後端服務)
+function asyncProcess(dataChunks) {
+  dataChunks.forEach((chunk, index) => {
+    setTimeout(() => {
+      batchProcessUpdates(chunk);
+      logToPage('已處理批次：', index);
+    }, 0);
+  });
+}
+        </code></pre>
+        <p>除了上述方法，也可透過以下手段進行優化：</p>
+        <ul>
+          <li>
+            使用 <code>Redis</code> 或
+            <code>SQLite</code> 等內存型數據庫提高讀寫效率
+          </li>
+          <li>使用 <code>Pandas</code> / <code>NumPy</code> 進行向量化運算</li>
+          <li>將核心運算移至後端，以多線程或 GPU 等方式加速</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- *********************************** -->
+    <!-- 5. 結果可視化模組 -->
+    <!-- *********************************** -->
+    <div class="section ant-card ant-card-bordered">
+      <div class="ant-card-body">
+        <h2>5. 結果可視化模組</h2>
+        <p>
+          透過圖表與交易記錄輸出，可快速檢視回測結果。以下以
+          <code>Chart.js</code> 為示例，展示基本的持倉曲線與收益曲線。
+        </p>
+        <div class="chart-container">
+          <canvas id="positionChart"></canvas>
+        </div>
+        <br />
+        <div class="chart-container">
+          <canvas id="pnlChart"></canvas>
+        </div>
+
+        <script>
+          let timeLabels = [
+            "10:00",
+            "10:01",
+            "10:02",
+            "10:03",
+            "10:04",
+            "10:05",
+            "10:06",
+            "10:07",
+            "10:08",
+            "10:09",
+          ];
+
+          let positionData = [0, 2, 4, 3, 5, 2, 7, 5, 6, 8];
+          let pnlData = [
+            10000, 9995, 10010, 10005, 10020, 9990, 10040, 10030, 10050, 10060,
+          ];
+
+          const ctx1 = document
+            .getElementById("positionChart")
+            .getContext("2d");
+          const positionChart = new Chart(ctx1, {
+            type: "line",
+            data: {
+              labels: timeLabels,
+              datasets: [
+                {
+                  label: "持倉",
+                  data: positionData,
+                  borderColor: "blue",
+                  fill: false,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              scales: {
+                x: { display: true, title: { display: true, text: "時間" } },
+                y: {
+                  display: true,
+                  title: { display: true, text: "持倉數量" },
+                },
+              },
+            },
+          });
+
+          const ctx2 = document.getElementById("pnlChart").getContext("2d");
+          const pnlChart = new Chart(ctx2, {
+            type: "line",
+            data: {
+              labels: timeLabels,
+              datasets: [
+                {
+                  label: "資產淨值 (PNL)",
+                  data: pnlData,
+                  borderColor: "green",
+                  fill: false,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              scales: {
+                x: { display: true, title: { display: true, text: "時間" } },
+                y: { display: true, title: { display: true, text: "PNL" } },
+              },
+            },
+          });
+        </script>
+
+        <p>交易記錄輸出 (示例)：</p>
+        <pre><code>
+// console.log 或另存 CSV、JSON 等檔案
+tradeHistory.forEach(record => {
+  console.log('時間:', new Date(record.timestamp).toLocaleString());
+  console.log('價格:', record.price, '交易量:', record.volume, '方向:', record.side);
+  console.log('持倉:', record.position, '剩餘資金:', record.cashBalance);
+  console.log('---------------------------');
+});
+        </code></pre>
+      </div>
+    </div>
+
+    <!-- *********************************** -->
+    <!-- 日誌輸出區塊 (讓使用者看到輸出) -->
+    <div id="logOutput"></div>
+
+    <!-- *********************************** -->
+    <!-- 程式執行示例 -->
+    <!-- *********************************** -->
+    <div class="section ant-card ant-card-bordered">
+      <div class="ant-card-body">
+        <h2>程式執行示例</h2>
+        <p>
+          下方提供簡易的「一鍵執行」範例，展示訂單簿初始化與更新、回測引擎的掛單/成交操作。
+        </p>
+
+        <!-- 使用 Ant Design 按鈕樣式 -->
+        <button class="ant-btn ant-btn-primary" onclick="runBacktestExample()">
+          執行回測示例 1
+        </button>
+        <button
+          class="ant-btn ant-btn-primary"
+          onclick="runAnotherBacktestExample()"
+        >
+          執行回測示例 2
+        </button>
+
+        <script>
+          // 建立自訂 log 函式，讓訊息同時顯示於 console 與頁面
+          function logToPage(...args) {
+            console.log(...args);
+            const logDiv = document.getElementById("logOutput");
+            logDiv.innerText += args.join(" ") + "\n";
+          }
+
+          function runBacktestExample() {
+            // 先清空日誌輸出
+            document.getElementById("logOutput").innerText = "";
+
+            // 1. 初始化訂單簿 (使用最初 snapshotData)
+            initOrderBook(snapshotData);
+            logToPage("初始訂單簿:", JSON.stringify(orderBook));
+
+            // 2. 更新訂單簿 (示例批量處理)
+            batchProcessUpdates(updateData);
+            logToPage("更新後訂單簿:", JSON.stringify(orderBook));
+            logToPage("累積深度:", JSON.stringify(calculateCumulativeDepth()));
+
+            // 3. 回測引擎：掛單 -> 成交 -> 撤單
+            placeOrder(99, 3, "buy");
+            logToPage("掛買單後訂單簿:", JSON.stringify(orderBook));
+
+            executeTrade(103, 2, "sell");
+            logToPage("成交後持倉:", position, "資金:", cashBalance);
+
+            cancelOrder(101, 3, "sell");
+            logToPage("撤單後訂單簿:", JSON.stringify(orderBook));
+
+            riskControl(10);
+            logToPage("最終持倉:", position, "剩餘資金:", cashBalance);
+
+            // 輸出交易記錄
+            logToPage("--- 交易記錄 ---");
+            tradeHistory.forEach((t, idx) => {
+              logToPage(
+                `#${idx + 1} | 時間: ${new Date(t.timestamp).toLocaleString()}, ` +
+                  `價格: ${t.price}, 量: ${t.volume}, 方向: ${t.side}, ` +
+                  `持倉: ${t.position}, 資金: ${t.cashBalance}`
+              );
+            });
+          }
+
+          function runAnotherBacktestExample() {
+            // 先清空日誌
+            document.getElementById("logOutput").innerText = "";
+
+            // 重置全域變數，以免與上次測試資料衝突
+            orderBook = { buy: {}, sell: {} };
+            position = 0;
+            cashBalance = 10000;
+            tradeHistory = [];
+
+            // 初始化訂單簿
+            initOrderBook(snapshotData);
+            logToPage("【回測示例2】初始訂單簿:", JSON.stringify(orderBook));
+
+            // 只使用部分 updateData
+            const partialUpdates = updateData.slice(0, 5);
+            batchProcessUpdates(partialUpdates);
+
+            logToPage("【回測示例2】更新後訂單簿:", JSON.stringify(orderBook));
+            logToPage(
+              "【回測示例2】累積深度:",
+              JSON.stringify(calculateCumulativeDepth())
+            );
+
+            // 模擬一些掛單與成交
+            placeOrder(100, 5, "buy");
+            executeTrade(102, 2, "sell");
+            logToPage("【回測示例2】持倉:", position, "資金:", cashBalance);
+
+            // 進行更多筆交易
+            executeTrade(103, 1, "sell");
+            executeTrade(99, 2, "buy");
+
+            cancelOrder(99, 1, "buy");
+            riskControl(5);
+            logToPage(
+              "【回測示例2】最終持倉:",
+              position,
+              "剩餘資金:",
+              cashBalance
+            );
+
+            // 顯示交易紀錄
+            logToPage("--- 【回測示例2】交易記錄 ---");
+            tradeHistory.forEach((t, idx) => {
+              logToPage(
+                `#${idx + 1} | 時間: ${new Date(t.timestamp).toLocaleString()}, ` +
+                  `價格: ${t.price}, 量: ${t.volume}, 方向: ${t.side}, ` +
+                  `持倉: ${t.position}, 資金: ${t.cashBalance}`
+              );
+            });
+          }
+        </script>
+      </div>
+    </div>
+  </body>
+</html>
